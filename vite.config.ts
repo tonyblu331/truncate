@@ -5,10 +5,9 @@ export default defineConfig({
     "*": "vp check --fix",
   },
   pack: {
-    dts: {
-      tsgo: true,
-    },
+    dts: true,
     exports: true,
+    format: ["esm"],
   },
   lint: {
     options: {
@@ -17,4 +16,7 @@ export default defineConfig({
     },
   },
   fmt: {},
+  test: {
+    setupFiles: ["./tests/setup.ts"],
+  },
 });
