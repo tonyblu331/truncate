@@ -1,0 +1,405 @@
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,300..800;1,300..800&family=Roboto+Slab:wght@100..900&display=swap');
+
+:root {
+  --black: #0a0a0a;
+  --white: #fefefe;
+  --gray-100: #f0f0f0;
+  --gray-200: #e0e0e0;
+  --gray-300: #b0b0b0;
+  --gray-500: #707070;
+  --gray-700: #404040;
+  --gray-900: #1a1a1a;
+
+  --font-body: 'Roboto Slab', Georgia, 'Times New Roman', serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+
+  --measure: 42rem;
+  --space: 1.5rem;
+  --space-lg: 4rem;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 18px;
+}
+
+body {
+  font-family: var(--font-body);
+  font-weight: 350;
+  font-size: 1rem;
+  line-height: 1.7;
+  color: var(--black);
+  background: var(--white);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+h1, h2, h3, h4 {
+  font-family: var(--font-body);
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  margin: 0 0 0.5em;
+}
+
+h1 { font-size: 3rem; }
+h2 { font-size: 1.75rem; }
+h3 { font-size: 1.25rem; }
+
+p {
+  margin: 0 0 1em;
+  max-width: var(--measure);
+}
+
+a {
+  color: var(--black);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+a:hover {
+  color: var(--gray-500);
+}
+
+code, pre {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  line-height: 1.5;
+}
+
+pre {
+  background: var(--gray-100);
+  border: 1px solid var(--gray-200);
+  border-radius: 4px;
+  padding: 1rem;
+  overflow-x: auto;
+}
+
+code {
+  background: var(--gray-100);
+  padding: 0.12em 0.3em;
+  border-radius: 3px;
+}
+
+pre code {
+  background: none;
+  padding: 0;
+}
+
+.theme-doc-markdown {
+  max-width: var(--measure);
+}
+
+/* ── Layout ───────────────────────────────────── */
+
+.navbar {
+  background: var(--white);
+  border-bottom: 1px solid var(--gray-200);
+  box-shadow: none;
+}
+
+.navbar__title {
+  font-family: var(--font-mono);
+  font-weight: 500;
+  font-size: 0.85rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--black);
+}
+
+.navbar__link {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.02em;
+}
+
+.navbar__link:hover {
+  color: var(--gray-500);
+}
+
+.main-wrapper {
+  max-width: var(--measure);
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+
+.footer {
+  background: var(--white);
+  border-top: 1px solid var(--gray-200);
+  padding: 1.5rem 0;
+  font-size: 0.75rem;
+  color: var(--gray-500);
+  text-align: center;
+}
+
+.footer__copyright {
+  color: var(--gray-500);
+}
+
+.container {
+  max-width: var(--measure);
+  margin: 0 auto;
+  padding: 0;
+}
+
+/* ── Hero ──────────────────────────────────────── */
+
+.hero {
+  padding: var(--space-lg) 0 var(--space);
+  border-bottom: 1px solid var(--gray-200);
+  margin-bottom: var(--space-lg);
+}
+
+.hero h1 {
+  margin-bottom: 0.25em;
+}
+
+.hero p {
+  font-size: 1.05rem;
+  color: var(--gray-700);
+}
+
+/* ── Install bar ───────────────────────────────── */
+
+.install-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: var(--space);
+}
+
+.install-bar code {
+  background: var(--gray-100);
+  font-size: 0.8rem;
+  padding: 0.4em 0.8em;
+  border: 1px solid var(--gray-200);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.install-bar code:hover {
+  background: var(--gray-200);
+}
+
+.install-bar .separator {
+  color: var(--gray-300);
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+}
+
+.install-bar .docs-link {
+  margin-left: auto;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  text-decoration: none;
+  border: 1px solid var(--black);
+  padding: 0.4em 0.8em;
+  border-radius: 4px;
+  transition: background 0.15s, color 0.15s;
+}
+
+.install-bar .docs-link:hover {
+  background: var(--black);
+  color: var(--white);
+}
+
+/* ── Scenario card ─────────────────────────────── */
+
+.scenario {
+  margin-bottom: var(--space-lg);
+}
+
+.scenario h2 {
+  padding-bottom: 0.25em;
+  border-bottom: 1px solid var(--gray-200);
+  margin-bottom: var(--space);
+}
+
+.scenario p {
+  font-size: 0.9rem;
+  color: var(--gray-700);
+}
+
+/* ── Playground controls ───────────────────────── */
+
+.playground-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space);
+  margin-bottom: var(--space);
+}
+
+.playground-controls label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--gray-700);
+}
+
+.playground-controls input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 10rem;
+  height: 1px;
+  background: var(--gray-300);
+  outline: none;
+}
+
+.playground-controls input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 12px;
+  height: 12px;
+  background: var(--black);
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.playground-controls input[type="range"]::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  background: var(--black);
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+}
+
+.playground-controls .value {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--black);
+}
+
+.playground-controls input[type="text"] {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  padding: 0.3em 0.5em;
+  border: 1px solid var(--gray-200);
+  border-radius: 4px;
+  background: var(--white);
+  color: var(--black);
+  width: 8rem;
+}
+
+.playground-controls input[type="text"]:focus {
+  outline: none;
+  border-color: var(--black);
+}
+
+/* ── Text input area ───────────────────────────── */
+
+.text-input-area textarea {
+  width: 100%;
+  font-family: var(--font-body);
+  font-size: 1rem;
+  line-height: 1.7;
+  padding: 0.75rem;
+  border: 1px solid var(--gray-200);
+  border-radius: 4px;
+  background: var(--white);
+  color: var(--black);
+  resize: vertical;
+  min-height: 4em;
+}
+
+.text-input-area textarea:focus {
+  outline: none;
+  border-color: var(--black);
+}
+
+/* ── Result display ────────────────────────────── */
+
+.result-box {
+  padding: var(--space);
+  margin: var(--space) 0;
+  border: 1px solid var(--gray-200);
+  border-radius: 4px;
+  background: var(--gray-100);
+  min-height: 3em;
+  display: flex;
+  align-items: center;
+}
+
+.result-box .result-text {
+  font-family: var(--font-body);
+  font-size: 1rem;
+  line-height: 1.7;
+  word-break: break-word;
+}
+
+.result-box .stats {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--gray-500);
+  margin-top: 0.25em;
+}
+
+/* ── Code block wrapper ────────────────────────── */
+
+.code-block {
+  position: relative;
+  margin: var(--space) 0;
+}
+
+.code-block pre {
+  margin: 0;
+}
+
+.code-block .copy-btn {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  padding: 0.25em 0.5em;
+  background: var(--white);
+  border: 1px solid var(--gray-200);
+  border-radius: 3px;
+  cursor: pointer;
+  color: var(--gray-500);
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.code-block .copy-btn:hover {
+  color: var(--black);
+  border-color: var(--black);
+}
+
+/* ── Responsive ────────────────────────────────── */
+
+@media (max-width: 600px) {
+  html { font-size: 16px; }
+  h1 { font-size: 2rem; }
+  .playground-controls { flex-direction: column; }
+  .install-bar { flex-direction: column; align-items: stretch; }
+  .install-bar .docs-link { margin-left: 0; text-align: center; }
+}
+
+/* ── Docusaurus overrides ──────────────────────── */
+
+.main-wrapper h1:first-child { margin-top: 0; }
+.main-wrapper h2:first-child { margin-top: 0; }
+.main-wrapper h3:first-child { margin-top: 0; }
+
+.theme-doc-markdown {
+  max-width: var(--measure);
+}
+
+.pagination-nav {
+  display: none;
+}
+
+.alert {
+  display: none;
+}
