@@ -1,0 +1,37 @@
+{
+  "name": "truncate",
+  "version": "0.1.0",
+  "description": "DOM-free text truncation powered by @chenglou/pretext",
+  "license": "MIT",
+  "author": "Antonio Bonet K Antonio Bonet",
+  "files": [
+    "dist"
+  ],
+  "type": "module",
+  "exports": {
+    ".": "./dist/index.mjs",
+    "./package.json": "./package.json"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "vp pack",
+    "dev": "vp pack --watch",
+    "test": "vp test",
+    "check": "vp check",
+    "prepublishOnly": "vp run build",
+    "prepare": "vp config"
+  },
+  "dependencies": {
+    "@chenglou/pretext": "^0.0.7"
+  },
+  "devDependencies": {
+    "@types/node": "^25.6.2",
+    "@typescript/native-preview": "7.0.0-dev.20260509.2",
+    "bumpp": "^11.1.0",
+    "typescript": "^6.0.3",
+    "vite-plus": "^0.1.20"
+  },
+  "packageManager": "pnpm@11.2.2"
+}
