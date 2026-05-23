@@ -1,59 +1,155 @@
 import { expect, test } from "vite-plus/test";
-import { truncateByWidth, truncateByLines, measureHeight } from "../src/index.ts";
+import {
+  truncateByWidth,
+  truncateByLines,
+  measureHeight,
+  truncate,
+  createTruncator,
+} from "../src/index.ts";
+
+const FONT = "16px sans-serif";
+const WIDE = 500;
+const NARROW = 50;
+const LONG = "A very long string that should not fit in fifty pixels at a large font size indeed";
+const PARA = "word word word word word word word word word word word word word word";
+
+// ── truncateByWidth ───────────────────────────────────────────
 
 test("truncateByWidth: short text fits", () => {
-  expect(truncateByWidth("hi", "16px sans-serif", 200)).toBe("hi");
+  expect(truncateByWidth("hi", { font: FONT, maxWidth: 200 })).toBe("hi");
 });
 
 test("truncateByWidth: empty string", () => {
-  expect(truncateByWidth("", "16px sans-serif", 200)).toBe("");
+  expect(truncateByWidth("", { font: FONT, maxWidth: 200 })).toBe("");
 });
 
 test("truncateByWidth: long text gets truncated", () => {
-  const long = "A very long string that should not fit in fifty pixels at a large font size indeed";
-  const result = truncateByWidth(long, "24px serif", 50);
-  expect(result.length).toBeLessThan(long.length);
+  const result = truncateByWidth(LONG, { font: "24px serif", maxWidth: NARROW });
+  expect(result.length).toBeLessThan(LONG.length);
   expect(result).toMatch(/…$/);
 });
 
+test("truncateByWidth: custom ellipsis", () => {
+  const result = truncateByWidth(LONG, { font: "24px serif", maxWidth: NARROW, ellipsis: " [more]" });
+  expect(result).toMatch(/\[more\]$/);
+});
+
+// ── truncateByLines ───────────────────────────────────────────
+
 test("truncateByLines: text fits within limit", () => {
-  const text = "Short text";
-  expect(truncateByLines(text, "16px sans-serif", 500, 20, 3)).toBe(text);
+  expect(truncateByLines("Short text", { font: FONT, maxWidth: WIDE, maxLines: 3 })).toBe("Short text");
 });
 
 test("truncateByLines: empty string", () => {
-  expect(truncateByLines("", "16px sans-serif", 500, 20, 3)).toBe("");
+  expect(truncateByLines("", { font: FONT, maxWidth: WIDE, maxLines: 3 })).toBe("");
 });
 
 test("truncateByLines: zero maxLines", () => {
-  expect(truncateByLines("hello", "16px sans-serif", 500, 20, 0)).toBe("");
+  expect(truncateByLines("hello", { font: FONT, maxWidth: WIDE, maxLines: 0 })).toBe("");
 });
 
 test("truncateByLines: overflows adds ellipsis", () => {
-  const text = "word word word word word word word word word word word word word word";
-  const result = truncateByLines(text, "16px sans-serif", 80, 20, 2);
+  const result = truncateByLines(PARA, { font: FONT, maxWidth: 80, maxLines: 2 });
   expect(result).toMatch(/…$/);
-  const lines = result.split("\n");
-  expect(lines.length).toBe(2);
+  expect(result.split("\n").length).toBe(2);
 });
+
+test("truncateByLines: custom lineHeight", () => {
+  const result = truncateByLines(PARA, { font: FONT, maxWidth: 80, maxLines: 2, lineHeight: 24 });
+  expect(result).toMatch(/…$/);
+  expect(result.split("\n").length).toBe(2);
+});
+
+// ── measureHeight ─────────────────────────────────────────────
 
 test("measureHeight: empty string", () => {
-  expect(measureHeight("", "16px sans-serif", 500, 20)).toBe(0);
+  expect(measureHeight("", { font: FONT, maxWidth: WIDE, lineHeight: 20 })).toBe(0);
 });
 
-test("measureHeight: returns at least one line height", () => {
-  const h = measureHeight("hello", "16px sans-serif", 500, 20);
+test("measureHeight: single line", () => {
+  const h = measureHeight("hello", { font: FONT, maxWidth: WIDE, lineHeight: 20 });
   expect(h).toBeGreaterThanOrEqual(20);
 });
 
-test("measureHeight: multi-line text", () => {
-  const long = "word word word word word word word word word word word word word word";
-  const h = measureHeight(long, "16px sans-serif", 80, 20);
+test("measureHeight: multi-line", () => {
+  const h = measureHeight(PARA, { font: FONT, maxWidth: 80, lineHeight: 20 });
   expect(h).toBeGreaterThan(20);
 });
 
-test("custom ellipsis", () => {
-  const long = "A very long string that should not fit in fifty pixels at a large font size indeed";
-  const result = truncateByWidth(long, "24px serif", 50, { ellipsis: " [more]" });
-  expect(result).toMatch(/\[more\]$/);
+// ── truncate (auto-detect) ────────────────────────────────────
+
+test("truncate: auto width (no maxLines)", () => {
+  const result = truncate(LONG, { font: "24px serif", maxWidth: NARROW });
+  expect(result).toMatch(/…$/);
+  expect(result.length).toBeLessThan(LONG.length);
+});
+
+test("truncate: auto lines (has maxLines)", () => {
+  const result = truncate(PARA, { font: FONT, maxWidth: 80, maxLines: 2 });
+  expect(result.split("\n").length).toBe(2);
+  expect(result).toMatch(/…$/);
+});
+
+test("truncate: short text passes through", () => {
+  expect(truncate("hi", { font: FONT, maxWidth: 200 })).toBe("hi");
+});
+
+// ── createTruncator ───────────────────────────────────────────
+
+test("createTruncator: pre-configures font", () => {
+  const t = createTruncator({ font: FONT });
+  expect(t.truncateByWidth("hi", { maxWidth: 200 })).toBe("hi");
+});
+
+test("createTruncator: truncateByLines", () => {
+  const t = createTruncator({ font: FONT });
+  const result = t.truncateByLines(PARA, { maxWidth: 80, maxLines: 2 });
+  expect(result).toMatch(/…$/);
+});
+
+test("createTruncator: measureHeight", () => {
+  const t = createTruncator({ font: FONT });
+  const h = t.measureHeight("hello", { maxWidth: WIDE, lineHeight: 20 });
+  expect(h).toBeGreaterThanOrEqual(20);
+});
+
+test("createTruncator: truncate", () => {
+  const t = createTruncator({ font: FONT });
+  expect(t.truncate("hi", { maxWidth: 200 })).toBe("hi");
+});
+
+test("createTruncator: per-call override", () => {
+  const t = createTruncator({ font: "16px sans-serif" });
+  const result = t.truncateByWidth(LONG, { font: "24px serif", maxWidth: NARROW });
+  expect(result).toMatch(/…$/);
+});
+
+test("createTruncator: with lineHeight default", () => {
+  const t = createTruncator({ font: FONT, lineHeight: 24 });
+  const h = t.measureHeight(PARA, { maxWidth: 80 });
+  expect(h).toBeGreaterThanOrEqual(24);
+});
+
+// ── wordBreak passthrough ─────────────────────────────────────
+
+test("wordBreak: keep-all prevents CJK break", () => {
+  const cjk = "天地玄黄宇宙洪荒日月盈昃辰宿列张";
+  const result = truncateByWidth(cjk, { font: FONT, maxWidth: 50, wordBreak: "keep-all" });
+  expect(result).toMatch(/…$/);
+});
+
+// ── letterSpacing ─────────────────────────────────────────────
+
+test("letterSpacing: affects measurement", () => {
+  const normal = measureHeight("hello world", { font: FONT, maxWidth: 60, lineHeight: 20 });
+  const spaced = measureHeight("hello world", { font: FONT, maxWidth: 60, lineHeight: 20, letterSpacing: 5 });
+  expect(spaced).toBeGreaterThanOrEqual(normal);
+});
+
+// ── whiteSpace pre-wrap ───────────────────────────────────────
+
+test("whiteSpace: pre-wrap preserves breaks", () => {
+  const multi = "line one\nline two\nline three";
+  const h = measureHeight(multi, { font: FONT, maxWidth: WIDE, lineHeight: 20, whiteSpace: "pre-wrap" });
+  expect(h).toBeGreaterThanOrEqual(60);
 });

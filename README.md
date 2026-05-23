@@ -6,47 +6,154 @@
 npm install @antonio-bonet/truncate
 ```
 
+## Quick start
+
+```ts
+import { truncate, createTruncator } from "truncate"
+
+// Auto-detect strategy based on options
+truncate("A very long string", { font: "16px Inter", maxWidth: 100 })
+// → "A very lo…"  (width truncation)
+
+truncate(longArticle, { font: "16px Inter", maxWidth: 320, maxLines: 3 })
+// → "First line\nSecond line\nThird li…"  (line truncation)
+
+// Factory for repeated use
+const t = createTruncator({ font: "16px Inter", lineHeight: 22 })
+
+t.truncateByWidth("Hello", { maxWidth: 200 })
+t.truncateByLines(longArticle, { maxWidth: 320, maxLines: 3 })
+t.measureHeight("Hello\nworld", { maxWidth: 320 })
+```
+
 ## API
 
-```ts
-import { truncateByWidth, truncateByLines, measureHeight } from "truncate";
-```
+### `truncate(text, options)` ★
 
-### `truncateByWidth(text, font, maxWidth, options?)`
+Single entry point, auto-detects strategy:
 
-Truncate text to fit within a given pixel width on a single line.
-
-```ts
-truncateByWidth("A very long string", "16px Inter", 100);
-// => "A very lo…"
-
-truncateByWidth("Short", "16px Inter", 200);
-// => "Short"
-```
-
-### `truncateByLines(text, font, maxWidth, lineHeight, maxLines, options?)`
-
-Truncate text to fit within N lines.
+| If `options` has… | Strategy |
+|---|---|
+| `maxLines` | Multi-line truncation via `truncateByLines` |
+| no `maxLines` | Single-line width truncation via `truncateByWidth` |
 
 ```ts
-truncateByLines(longArticle, "16px Inter", 320, 22, 3);
-// => "First line\nSecond line\nThird li…"
+truncate("Hello world", { font: "16px Inter", maxWidth: 100 })
+truncate("Hello world", { font: "16px Inter", maxWidth: 100, maxLines: 3, lineHeight: 22 })
 ```
 
-### `measureHeight(text, font, maxWidth, lineHeight)`
+### `truncateByWidth(text, options)`
 
-Measure the rendered height of text at a given width — no DOM needed.
+Explicit single-line width truncation.
 
 ```ts
-measureHeight("Hello\nworld", "16px Inter", 320, 22);
-// => 44
+truncateByWidth("A very long string", {
+  font: "16px Inter",
+  maxWidth: 100,
+  ellipsis: "…",
+})
 ```
 
-### Options
+### `truncateByLines(text, options)`
+
+Explicit multi-line truncation.
+
+```ts
+truncateByLines(longArticle, {
+  font: "16px Inter",
+  maxWidth: 320,
+  lineHeight: 22,
+  maxLines: 3,
+})
+```
+
+### `measureHeight(text, options)`
+
+Measure rendered height at a given width — no DOM needed.
+
+```ts
+measureHeight("Hello\nworld", {
+  font: "16px Inter",
+  maxWidth: 320,
+  lineHeight: 22,
+})
+// → 44
+```
+
+### `createTruncator(config)` ★
+
+Pre-configure `font` (and optional defaults) for repeated use.
+
+```ts
+const t = createTruncator({
+  font: "16px Inter",
+  lineHeight: 22,
+  ellipsis: "…",
+})
+
+// Font is already set — pass only what varies
+t.truncateByWidth("Hello", { maxWidth: 200 })
+t.truncateByLines(longArticle, { maxWidth: 320, maxLines: 3 })
+t.measureHeight("Hello\nworld", { maxWidth: 320 })
+
+// Per-call overrides win
+t.truncateByWidth("Bold text", { font: "bold 24px Inter", maxWidth: 200 })
+```
+
+Returns an object with `truncate`, `truncateByWidth`, `truncateByLines`, and `measureHeight` — all with `font` pre-bound.
+
+## Options reference
+
+### `TruncateOptions`
+
+| Option | Type | Default | Required | Used by |
+|---|---|---|---|---|
+| `font` | `string` | — | ✅ | All |
+| `maxWidth` | `number` | — | ✅ | All |
+| `lineHeight` | `number` | `20` | only for lines | `truncateByLines` |
+| `maxLines` | `number` | — | only for lines | `truncateByLines` |
+| `ellipsis` | `string` | `"…"` | ❌ | truncation |
+| `wordBreak` | `'normal' \| 'keep-all'` | `'normal'` | ❌ | All |
+| `letterSpacing` | `number` | — | ❌ | All |
+| `whiteSpace` | `'normal' \| 'pre-wrap'` | `'normal'` | ❌ | All |
+
+### `MeasureOptions`
+
+| Option | Type | Default | Required |
+|---|---|---|---|
+| `font` | `string` | — | ✅ |
+| `maxWidth` | `number` | — | ✅ |
+| `lineHeight` | `number` | — | ✅ |
+| `wordBreak` | `'normal' \| 'keep-all'` | `'normal'` | ❌ |
+| `letterSpacing` | `number` | — | ❌ |
+| `whiteSpace` | `'normal' \| 'pre-wrap'` | `'normal'` | ❌ |
+
+### `TruncatorConfig`
 
 | Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `ellipsis` | `string` | `"…"` | Custom ellipsis string |
+|---|---|---|---|
+| `font` | `string` | — | Font pre-bound to all methods |
+| `lineHeight` | `number` | — | Default for `truncateByLines` / `measureHeight` |
+| `ellipsis` | `string` | `"…"` | Default ellipsis |
+| `wordBreak` | `'normal' \| 'keep-all'` | `'normal'` | Default word-break behaviour |
+| `letterSpacing` | `number` | — | Default letter spacing |
+| `whiteSpace` | `'normal' \| 'pre-wrap'` | `'normal'` | Default whitespace mode |
+
+## Passthrough options
+
+`wordBreak`, `letterSpacing`, and `whiteSpace` are passed directly to `@chenglou/pretext`. See the [Pretext docs](https://github.com/chenglou/pretext) for details.
+
+- `wordBreak: "keep-all"` — prevents breaks inside CJK/Hangul runs
+- `letterSpacing` — matches CSS `letter-spacing` in pixels
+- `whiteSpace: "pre-wrap"` — preserves explicit `\n` and tabs
+
+## TypeScript
+
+Fully typed. All options interfaces are exported:
+
+```ts
+import type { TruncateOptions, MeasureOptions, TruncatorConfig, Truncator } from "truncate"
+```
 
 ## Why?
 
@@ -54,6 +161,7 @@ measureHeight("Hello\nworld", "16px Inter", 320, 22);
 - **No flickering** — Measure before rendering, skip the layout shift dance
 - **Works in Workers** — Pure computation, needs only `OffscreenCanvas`
 - **Multi-line** — Not just single-line ellipsis, actual line-aware truncation
+- **Options bags** — No positional param soup, just clean objects
 
 ## How it works
 
