@@ -22,8 +22,7 @@ const URL = 'https://github.com/tonyblu331/truncate/blob/main/src/truncate.ts'
 const SCENARIOS = [
   { id: 'width', label: 'Width' },
   { id: 'lines', label: 'Lines' },
-  { id: 'position', label: 'Position' },
-  { id: 'cjk', label: 'Cjk' },
+  { id: 'languages', label: 'Languages' },
   { id: 'spacing', label: 'Spacing' },
   { id: 'factory', label: 'Factory' },
 ]
@@ -94,7 +93,7 @@ function Code({ code }: { code: string }) {
     <div className="relative mt-4">
       <pre className="font-mono text-s leading-relaxed ring-1 ring-base/15 p-4 pt-8 overflow-x-auto">
         <button type="button" onClick={async () => { await navigator.clipboard.writeText(code); setCopied(true); setTimeout(() => setCopied(false), 1500) }}
-          className="absolute -top-px right-0 font-mono text-s px-2 py-0.5 ring-1 ring-base bg-surface text-base hover:bg-base hover:text-surface">
+          className="absolute -top-px right-0 font-mono text-s px-2 py-0.5 ring-1 ring-base/15 bg-surface text-base hover:bg-base hover:text-surface">
           {copied ? 'copied' : 'copy'}
         </button>
         <code>{code}</code>
@@ -119,18 +118,18 @@ export default function Playground() {
   const r2 = truncateByLines(t2, { maxWidth: w2, lineHeight: lh2, maxLines: l2 })
   const h2 = measureHeight(t2, { maxWidth: w2, lineHeight: lh2 })
 
-  const [tp, setTp] = useState(QUICK)
-  const [wp, setWp] = useState(300)
-  const [ep, setEp] = useState('…')
-  const [mode, setMode] = useState<'start' | 'middle' | 'end'>('end')
-  const rs = truncateStart(tp, { maxWidth: wp, ellipsis: ep })
-  const rm = truncateMiddle(tp, { maxWidth: wp, ellipsis: ep })
-  const re = truncateByWidth(tp, { maxWidth: wp, ellipsis: ep })
-
-  const [t4, setT4] = useState(CJK)
-  const [w4, setW4] = useState(200)
-  const r4n = truncateByWidth(t4, { maxWidth: w4 })
-  const r4k = truncateByWidth(t4, { maxWidth: w4, wordBreak: 'keep-all' })
+  const [t4, setT4] = useState('The quick brown fox jumps over the lazy dog.')
+  const [lang, setLang] = useState('english')
+  const langs: Record<string, string> = {
+    english: 'The quick brown fox jumps over the lazy dog.',
+    spanish: 'El veloz murciélago hindú comía feliz cardillo y kiwi.',
+    german: 'Victor jagt zwölf Boxkämpfer quer über den großen Sylter Deich.',
+    russian: 'Съешь ещё этих мягких французских булок, да выпей чаю.',
+    thai: 'เป็นมนุษย์สุดประเสริฐเลิศคุณค่า กว่าบรรดาฝูงสัตว์เดรัจฉาน',
+    cjk: '天地玄黄宇宙洪荒日月盈昃辰宿列张寒来暑往秋收冬藏闰余成岁律吕调阳云腾致雨露结为霜金生丽水玉出昆冈剑号巨阙珠称夜光',
+  }
+  const r4n = truncateByWidth(t4, { maxWidth: 200 })
+  const r4k = truncateByWidth(t4, { maxWidth: 200, wordBreak: 'keep-all' })
 
   const [t5, setT5] = useState(QUICK)
   const [w5, setW5] = useState(350)
@@ -141,9 +140,15 @@ export default function Playground() {
   const [l6, setL6] = useState(2)
   const [activeSels, setActiveSels] = useState(new Set(['body']))
   const results = {
-    body: createTruncator({ selector: 'body', lineHeight: 28 }).truncateByLines(LONG, { maxWidth: w6, maxLines: l6 }),
-    h1: createTruncator({ selector: 'h1', lineHeight: 28 }).truncateByLines(LONG, { maxWidth: w6, maxLines: l6 }),
-    code: createTruncator({ selector: 'code', lineHeight: 28 }).truncateByLines(LONG, { maxWidth: w6, maxLines: l6 }),
+    body: activeSels.has('body')
+      ? createTruncator({ selector: 'body', lineHeight: 28 }).truncateByLines(LONG, { maxWidth: w6, maxLines: l6 })
+      : LONG,
+    h1: activeSels.has('h1')
+      ? createTruncator({ selector: 'h1', lineHeight: 28 }).truncateByLines(LONG, { maxWidth: w6, maxLines: l6 })
+      : LONG,
+    code: activeSels.has('code')
+      ? createTruncator({ selector: 'code', lineHeight: 28 }).truncateByLines(LONG, { maxWidth: w6, maxLines: l6 })
+      : LONG,
   }
   const toggle = (s: string) => {
     const next = new Set(activeSels)
@@ -212,40 +217,24 @@ export default function Playground() {
 
       <Divider />
 
-      <Section id="position" title="Position" desc="Choose where the ellipsis goes. Start, middle, or end. Mix truncation modes with a custom ellipsis character.">
-        <textarea value={tp} onChange={e => setTp(e.target.value)} rows={2}
-          className="w-full text-m leading-body p-3 ring-1 ring-base/15 resize-y min-h-[8em] focus:outline-none focus:ring-2 text-base bg-surface" aria-label="Sample text" />
-        <div className="flex flex-wrap gap-4 mt-4">
-          <Slider label="Max width" value={wp} onChange={setWp} min={50} max={600} suffix="px" />
-          <div className="flex flex-col gap-1">
-            <label htmlFor="ellipsis-pos" className="font-mono text-s text-dim uppercase">Ellipsis</label>
-            <input id="ellipsis-pos" type="text" value={ep} onChange={e => setEp(e.target.value)}
-              className="font-mono text-s px-2 py-1 ring-1 ring-base/15 text-base w-32 focus:outline-none focus:ring-2 bg-surface" aria-label="Ellipsis text" />
-          </div>
-        </div>
+      <Section id="languages" title="Languages" desc="Switch between scripts to see how wordBreak keep-all affects each language differently.">
         <div className="flex flex-wrap gap-x-6 gap-y-1 mt-3">
-          {(['start', 'middle', 'end'] as const).map(m => (
-            <label key={m} className="flex items-center font-mono text-s text-dim cursor-pointer capitalize">
-              <input type="radio" name="mode" value={m} checked={mode === m} onChange={() => setMode(m)} className={RADIO_CLS} />
-              {m}
+          {['english', 'spanish', 'german', 'russian', 'thai', 'cjk'].map(l => (
+            <label key={l} className="flex items-center font-mono text-s text-dim cursor-pointer capitalize">
+              <input type="radio" name="lang" value={l} checked={lang === l} onChange={() => { setLang(l); setT4(langs[l]) }} className={RADIO_CLS} />
+              {l}
             </label>
           ))}
         </div>
-        <div className="mt-4 space-y-2">
-          <div className="p-3 ring-1 ring-base/15">
-            <T role="dim" size="s" mono className="mr-2">Start</T>
-            <T size="m" className="leading-body break-words">{rs}</T>
-          </div>
-          <div className="p-3 ring-1 ring-base/15">
-            <T role="dim" size="s" mono className="mr-2">Middle</T>
-            <T size="m" className="leading-body break-words">{rm}</T>
-          </div>
-          <div className="p-3 ring-1 ring-base/15">
-            <T role="dim" size="s" mono className="mr-2">End</T>
-            <T size="m" className="leading-body break-words">{re}</T>
-          </div>
+        <textarea value={t4} onChange={e => setT4(e.target.value)} rows={2}
+          className="w-full text-m leading-body p-3 ring-1 ring-base/15 resize-y min-h-[8em] focus:outline-none focus:ring-2 text-base bg-surface" aria-label="Sample text" />
+        <div className="p-4 mt-4 ring-1 ring-base/15">
+          <T role="dim" size="s" mono className="mb-1">Normal</T>
+          <T size="m" className="leading-body break-words mb-3">{r4n}</T>
+          <T role="dim" size="s" mono className="mb-1">Keep all</T>
+          <T size="m" className="leading-body break-words">{r4k}</T>
         </div>
-        <Code code={`// start\ntruncateStart(\n  ${JSON.stringify(short(tp))},\n  { maxWidth: ${wp}, ellipsis: ${JSON.stringify(ep)} }\n)\n\n// middle\ntruncateMiddle(\n  ${JSON.stringify(short(tp))},\n  { maxWidth: ${wp}, ellipsis: ${JSON.stringify(ep)} }\n)\n\n// end\ntruncateByWidth(\n  ${JSON.stringify(short(tp))},\n  { maxWidth: ${wp}, ellipsis: ${JSON.stringify(ep)} }\n)`} />
+        <Code code={`truncateByWidth(\n  ${JSON.stringify(short(t4))},\n  { maxWidth: 200 }\n)\n\n// keep-all\ntruncateByWidth(\n  ${JSON.stringify(short(t4))},\n  { maxWidth: 200, wordBreak: "keep-all" }\n)`} />
       </Section>
 
       <Divider />
@@ -282,36 +271,35 @@ export default function Playground() {
 
       <Divider />
 
-      <Section id="factory" title="Truncator factory" desc="Toggle selectors to compare how different font configs affect truncation. Each uses its registered font via createTruncator.">
-        <div className="flex flex-wrap gap-4 mt-4">
+      <Section id="factory" title="Truncator factory" desc="Toggle truncation per selector. Each uses its registered font. ON = truncated, OFF = full text.">
+        <div className="flex flex-wrap items-start gap-4 mt-4">
           <Slider label="Max width" value={w6} onChange={setW6} min={200} max={700} suffix="px" />
           <Slider label="Max lines" value={l6} onChange={setL6} min={1} max={8} />
-        </div>
-        <div className="flex flex-wrap gap-x-6 gap-y-1 mt-3">
-          {[
-            { value: 'body', label: 'body', font: '18px Geist' },
-            { value: 'h1', label: 'h1', font: '26px Geist' },
-            { value: 'code', label: 'code', font: '13px Geist Mono' },
-          ].map(s => (
-            <label key={s.value} className="flex items-center font-mono text-s text-dim cursor-pointer">
-              <input type="checkbox" checked={activeSels.has(s.value)} onChange={() => toggle(s.value)}
-                className="appearance-none w-3 h-3 ring-1 ring-base mr-1.5 cursor-pointer checked:bg-base" />
-              {s.label} <T role="dim" size="s" mono as="span" className="ml-1">({s.font})</T>
-            </label>
-          ))}
+          <div className="flex flex-wrap items-center gap-3">
+            {[
+              { value: 'body', label: 'body', font: '18px Geist' },
+              { value: 'h1', label: 'h1', font: '26px Geist' },
+              { value: 'code', label: 'code', font: '13px Geist Mono' },
+            ].map(s => (
+              <label key={s.value} className="flex items-center font-mono text-s text-dim cursor-pointer">
+                <input type="checkbox" checked={activeSels.has(s.value)} onChange={() => toggle(s.value)}
+                  className="appearance-none w-3 h-3 ring-1 ring-base mr-1.5 cursor-pointer checked:bg-base" />
+                {s.label}
+              </label>
+            ))}
+          </div>
         </div>
         <div className="p-4 mt-4 ring-1 ring-base/15">
-          {activeSels.size === 0
-            ? <T role="dim" size="m">Toggle a selector above</T>
-            : Array.from(activeSels).map((s, i) => (
-                <div key={s}>
-                  {i > 0 && <hr className="my-3 ring-0 ring-t-base/15 ring-t-1" />}
-                  <div className="flex items-baseline gap-2">
-                    <T role="dim" size="s" mono className="shrink-0">{s}</T>
-                    <T size="m" className="leading-body break-words">{results[s as keyof typeof results]}</T>
-                  </div>
-                </div>
-              ))}
+          {(['body', 'h1', 'code'] as const).map((s, i) => (
+            <div key={s}>
+              {i > 0 && <hr className="my-3 ring-0 ring-t-base/15 ring-t-1" />}
+              <div className="flex items-baseline gap-2">
+                <T role="dim" size="s" mono className="shrink-0">{s}</T>
+                <T size="m" className="leading-body break-words">{results[s]}</T>
+                <T role="dim" size="s" mono className="shrink-0">({activeSels.has(s) ? `${s === 'code' ? '13px Geist Mono' : s === 'h1' ? '26px Geist' : '18px Geist'}` : 'full'})</T>
+              </div>
+            </div>
+          ))}
         </div>
         <Code code={`const tBody = createTruncator({ selector: 'body', lineHeight: 28 })\nconst tH1   = createTruncator({ selector: 'h1', lineHeight: 28 })\nconst tCode = createTruncator({ selector: 'code', lineHeight: 28 })\n\ntBody.truncateByLines(\n  ${JSON.stringify(short(LONG))},\n  { maxWidth: ${w6}, maxLines: ${l6} }\n)\n// 18px Geist`} />
       </Section>
