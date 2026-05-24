@@ -139,9 +139,17 @@ export default function Playground() {
 
   const [w6, setW6] = useState(400)
   const [l6, setL6] = useState(2)
-  const [sel, setSel] = useState('body')
-  const Tfac = createTruncator({ selector: sel, lineHeight: 28 })
-  const r6 = Tfac.truncateByLines(LONG, { maxWidth: w6, maxLines: l6 })
+  const [activeSels, setActiveSels] = useState(new Set(['body']))
+  const results = {
+    body: createTruncator({ selector: 'body', lineHeight: 28 }).truncateByLines(LONG, { maxWidth: w6, maxLines: l6 }),
+    h1: createTruncator({ selector: 'h1', lineHeight: 28 }).truncateByLines(LONG, { maxWidth: w6, maxLines: l6 }),
+    code: createTruncator({ selector: 'code', lineHeight: 28 }).truncateByLines(LONG, { maxWidth: w6, maxLines: l6 }),
+  }
+  const toggle = (s: string) => {
+    const next = new Set(activeSels)
+    next.has(s) ? next.delete(s) : next.add(s)
+    setActiveSels(next)
+  }
 
   return (
     <div>
@@ -274,7 +282,7 @@ export default function Playground() {
 
       <Divider />
 
-      <Section id="factory" title="Truncator factory" desc="Pre-configure defaults via createTruncator. Toggle between registered selectors to see how font configuration affects truncation.">
+      <Section id="factory" title="Truncator factory" desc="Toggle selectors to compare how different font configs affect truncation. Each uses its registered font via createTruncator.">
         <div className="flex flex-wrap gap-4 mt-4">
           <Slider label="Max width" value={w6} onChange={setW6} min={200} max={700} suffix="px" />
           <Slider label="Max lines" value={l6} onChange={setL6} min={1} max={8} />
@@ -286,13 +294,22 @@ export default function Playground() {
             { value: 'code', label: 'code', font: '13px Geist Mono' },
           ].map(s => (
             <label key={s.value} className="flex items-center font-mono text-s text-dim cursor-pointer">
-              <input type="radio" name="selector" value={s.value} checked={sel === s.value} onChange={() => setSel(s.value)} className={RADIO_CLS} />
+              <input type="checkbox" checked={activeSels.has(s.value)} onChange={() => toggle(s.value)}
+                className="appearance-none w-3 h-3 ring-1 ring-base mr-1.5 cursor-pointer checked:bg-base" />
               {s.label} <T role="dim" size="s" mono as="span" className="ml-1">({s.font})</T>
             </label>
           ))}
         </div>
-        <Result>{r6}</Result>
-        <Code code={`register('body', { font: '18px Geist' })\nregister('h1', { font: '26px Geist' })\nregister('code', { font: '13px Geist Mono' })\n\nconst t = createTruncator({\n  selector: '${sel}',\n  lineHeight: 28,\n})\n\nt.truncateByLines(\n  ${JSON.stringify(short(LONG))},\n  { maxWidth: ${w6}, maxLines: ${l6} }\n)`} />
+        <div className="mt-4 space-y-2">
+          {Array.from(activeSels).map(s => (
+            <div key={s} className="p-3 ring-1 ring-base/15">
+              <T role="dim" size="s" mono className="mr-2">{s}</T>
+              <T size="m" className="leading-body break-words">{results[s as keyof typeof results]}</T>
+            </div>
+          ))}
+          {activeSels.size === 0 && <T role="dim" size="m" className="leading-body">Toggle a selector above to see results</T>}
+        </div>
+        <Code code={`const tBody = createTruncator({ selector: 'body', lineHeight: 28 })\nconst tH1   = createTruncator({ selector: 'h1', lineHeight: 28 })\nconst tCode = createTruncator({ selector: 'code', lineHeight: 28 })\n\ntBody.truncateByLines(\n  ${JSON.stringify(short(LONG))},\n  { maxWidth: ${w6}, maxLines: ${l6} }\n)\n// 18px Geist`} />
       </Section>
     </div>
   )
