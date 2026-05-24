@@ -85,6 +85,7 @@ export function truncateByWidth(text: string, options: TruncateOptions): string 
   if (!text) return ''
   const extras = extractExtras(options)
   const { font, maxWidth } = options
+  if (maxWidth <= 0) return ''
 
   if (lineCount(text, font, maxWidth, extras) <= 1) return text
 
@@ -105,6 +106,7 @@ export function truncateByLines(text: string, options: TruncateOptions): string 
   if (maxLines <= 0) return ''
   const extras = extractExtras(options)
   const { font, maxWidth } = options
+  if (maxWidth <= 0) return ''
   const lh = options.lineHeight ?? 20
 
   const prepared = prepSeg(text, font, extras)
@@ -126,6 +128,7 @@ export function truncateByLines(text: string, options: TruncateOptions): string 
 
 export function measureHeight(text: string, options: MeasureOptions): number {
   if (!text) return 0
+  if (options.maxWidth <= 0) return 0
   const extras = extractExtras(options)
   const p = prep(text, options.font, extras)
   const { height } = layout(p, options.maxWidth, options.lineHeight)

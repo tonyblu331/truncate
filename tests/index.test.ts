@@ -153,3 +153,65 @@ test("whiteSpace: pre-wrap preserves breaks", () => {
   const h = measureHeight(multi, { font: FONT, maxWidth: WIDE, lineHeight: 20, whiteSpace: "pre-wrap" });
   expect(h).toBeGreaterThanOrEqual(60);
 });
+
+// ── 10 Edge Cases ──────────────────────────────────────────────
+
+test("edge: maxWidth=0 returns empty", () => {
+  expect(truncateByWidth("hello", { font: FONT, maxWidth: 0 })).toBe("");
+  expect(truncateByLines("hello", { font: FONT, maxWidth: 0 })).toBe("");
+  expect(measureHeight("hello", { font: FONT, maxWidth: 0, lineHeight: 20 })).toBe(0);
+});
+
+test("edge: maxWidth negative returns empty", () => {
+  expect(truncateByWidth("hello", { font: FONT, maxWidth: -10 })).toBe("");
+  expect(truncateByLines("hello", { font: FONT, maxWidth: -10 })).toBe("");
+  expect(measureHeight("hello", { font: FONT, maxWidth: -10, lineHeight: 20 })).toBe(0);
+});
+
+test("edge: ellipsis wider than maxWidth does not crash", () => {
+  const result = truncateByWidth("hi", { font: "24px serif", maxWidth: 5, ellipsis: "[really long ellipsis text]" });
+  expect(result).toBeTruthy();
+  expect(typeof result).toBe("string");
+});
+
+test("edge: text fits exactly at boundary returns unchanged", () => {
+  expect(truncateByWidth("hi", { font: FONT, maxWidth: WIDE })).toBe("hi");
+});
+
+test("edge: empty ellipsis truncates without suffix", () => {
+  const result = truncateByWidth(LONG, { font: "24px serif", maxWidth: NARROW, ellipsis: "" });
+  expect(result.length).toBeLessThan(LONG.length);
+  expect(result).not.toMatch(/…$/);
+});
+
+test("edge: whitespace-only text preserved if fits", () => {
+  expect(truncateByWidth("   ", { font: FONT, maxWidth: WIDE })).toBe("   ");
+});
+
+test("edge: very long unbreakable word truncated", () => {
+  const long = "a".repeat(200);
+  const result = truncateByWidth(long, { font: FONT, maxWidth: NARROW });
+  expect(result.length).toBeLessThan(long.length);
+  expect(result).toMatch(/…$/);
+});
+
+test("edge: emoji ZWJ sequence handled gracefully", () => {
+  const family = "👨‍👩‍👧‍👦";
+  const result = truncateByWidth(family, { font: FONT, maxWidth: NARROW });
+  expect(typeof result).toBe("string");
+  expect(result.length).toBeGreaterThan(0);
+});
+
+test("edge: RTL Arabic text truncated without error", () => {
+  const arabic = "مرحبا بالعالم هذا نص طويل";
+  const result = truncateByWidth(arabic, { font: FONT, maxWidth: NARROW });
+  expect(typeof result).toBe("string");
+  expect(result.length).toBeGreaterThan(0);
+});
+
+test("edge: newlines in truncateByWidth with pre-wrap", () => {
+  const multi = "line one\nline two\nline three";
+  const result = truncateByWidth(multi, { font: FONT, maxWidth: WIDE, whiteSpace: "pre-wrap" });
+  expect(result).toMatch(/^line one/);
+  expect(result.split("\n").length).toBe(1);
+});
