@@ -229,7 +229,28 @@ function extractFontSize(font: string): number {
   return m ? parseFloat(m[1]) : 16;
 }
 
-function parseCssWidth(value: CssWidth, fontSize?: number): number {
+function getMeasureContext(): CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D {
+  if (typeof OffscreenCanvas !== "undefined") {
+    return new OffscreenCanvas(0, 0).getContext("2d")!;
+  }
+  const cvs = document.createElement("canvas");
+  return cvs.getContext("2d")!;
+}
+
+function getStringWidth(str: string, font: string): number {
+  const ctx = getMeasureContext();
+  ctx.font = font;
+  return ctx.measureText(str).width;
+}
+
+function getViewportSize(): { width: number; height: number } {
+  if (typeof window !== "undefined") {
+    return { width: window.innerWidth, height: window.innerHeight };
+  }
+  return { width: 0, height: 0 };
+}
+
+function parseCssWidth(value: CssWidth, fontSize?: number, font?: string): number {
   if (typeof value === "number") return value;
 
   const raw = value.trim();
@@ -254,9 +275,35 @@ function parseCssWidth(value: CssWidth, fontSize?: number): number {
       return num * getRootFontSize();
     case "em":
       return num * (fontSize ?? 16);
+    case "ch": {
+      if (!font && typeof document === "undefined")
+        throw new TypeError(`truncate: ch unit requires a font in ${value}`);
+      return num * getStringWidth("0", font ?? "16px sans-serif");
+    }
+    case "vw":
+      return (num * getViewportSize().width) / 100;
+    case "vh":
+      return (num * getViewportSize().height) / 100;
+    case "vmin": {
+      const vp = getViewportSize();
+      return (num * Math.min(vp.width, vp.height)) / 100;
+    }
+    case "vmax": {
+      const vp = getViewportSize();
+      return (num * Math.max(vp.width, vp.height)) / 100;
+    }
+    case "%":
+      throw new TypeError(
+        `truncate: % is not supported in maxWidth "${value}". Use vw (viewport width) for percentage-of-viewport, or pass a resolved pixel width.`,
+      );
+    case "fr":
+      throw new TypeError(
+        `truncate: fr is not supported in maxWidth "${value}". fr is a CSS Grid unit and cannot be resolved without a grid container. Pass a resolved pixel value instead.`,
+      );
     default:
       throw new TypeError(
-        `truncate: unsupported unit "${unit}" in maxWidth "${value}". Use px, rem, or em.`,
+        `truncate: unsupported unit "${unit}" in maxWidth "${value}". ` +
+          `Supported units: px, rem, em, ch, vw, vh, vmin, vmax.`,
       );
   }
 }
@@ -269,7 +316,7 @@ export function truncateByWidth(text: string, options: TruncateOptions): Truncat
   if (!text) return { text: "", original: "", truncated: false, metrics: { originalLineCount: 0 } };
   const extras = extractExtras(options);
   const font = resolveFont(options);
-  const maxWidth = parseCssWidth(options.maxWidth, extractFontSize(font));
+  const maxWidth = parseCssWidth(options.maxWidth, extractFontSize(font), font);
   if (maxWidth <= 0)
     return { text: "", original, truncated: true, metrics: { originalLineCount: 0 } };
 
@@ -304,7 +351,7 @@ export function truncateByLines(text: string, options: TruncateOptions): Truncat
     return { text: "", original, truncated: true, metrics: { originalLineCount: 0 } };
   const extras = extractExtras(options);
   const font = resolveFont(options);
-  const maxWidth = parseCssWidth(options.maxWidth, extractFontSize(font));
+  const maxWidth = parseCssWidth(options.maxWidth, extractFontSize(font), font);
   if (maxWidth <= 0)
     return { text: "", original, truncated: true, metrics: { originalLineCount: 0 } };
   const lh = options.lineHeight ?? 20;
@@ -337,7 +384,7 @@ export function measureHeight(text: string, options: MeasureOptions): number {
   if (!text) return 0;
   const extras = extractExtras(options);
   const font = resolveFont(options);
-  const maxWidth = parseCssWidth(options.maxWidth, extractFontSize(font));
+  const maxWidth = parseCssWidth(options.maxWidth, extractFontSize(font), font);
   if (maxWidth <= 0) return 0;
   const lh = options.lineHeight ?? 20;
   const p = prep(text, font, extras);
@@ -351,7 +398,7 @@ export function truncateMiddle(text: string, options: TruncateOptions): Truncate
   if (!text) return { text: "", original: "", truncated: false, metrics: { originalLineCount: 0 } };
   const extras = extractExtras(options);
   const font = resolveFont(options);
-  const maxWidth = parseCssWidth(options.maxWidth, extractFontSize(font));
+  const maxWidth = parseCssWidth(options.maxWidth, extractFontSize(font), font);
   if (maxWidth <= 0)
     return { text: "", original, truncated: true, metrics: { originalLineCount: 0 } };
 
@@ -398,7 +445,7 @@ export function truncateStart(text: string, options: TruncateOptions): TruncateR
   if (!text) return { text: "", original: "", truncated: false, metrics: { originalLineCount: 0 } };
   const extras = extractExtras(options);
   const font = resolveFont(options);
-  const maxWidth = parseCssWidth(options.maxWidth, extractFontSize(font));
+  const maxWidth = parseCssWidth(options.maxWidth, extractFontSize(font), font);
   if (maxWidth <= 0)
     return { text: "", original, truncated: true, metrics: { originalLineCount: 0 } };
 

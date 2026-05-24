@@ -50,6 +50,7 @@ function T({
   mono = false,
   as: Tag = "span",
   className = "",
+  style,
   children,
 }: {
   role?: Role;
@@ -57,10 +58,12 @@ function T({
   mono?: boolean;
   as?: "p" | "span" | "div" | "label" | "h1" | "h2";
   className?: string;
+  style?: React.CSSProperties;
   children: ReactNode;
 }) {
   return (
     <Tag
+      style={style}
       className={`${szCls[size]} ${roleCls[role]} ${mono ? "font-mono" : "font-sans"} ${className}`}
     >
       {children}
@@ -93,18 +96,6 @@ function Section({
       </T>
       {children}
     </section>
-  );
-}
-
-function Divider() {
-  return (
-    <div className="flex items-center gap-4 mb-24 select-none" aria-hidden>
-      <hr className="flex-1 ring-0 ring-t-base/15 ring-t-1" />
-      <T size="m" className="text-base/85 tracking-[0.2em] select-none">
-        ...
-      </T>
-      <hr className="flex-1 ring-0 ring-t-base/15 ring-t-1" />
-    </div>
   );
 }
 
@@ -209,9 +200,12 @@ export default function Playground() {
   const r4n = truncateByWidth(t4, { maxWidth: 200 });
   const r4k = truncateByWidth(t4, { maxWidth: 200, wordBreak: "keep-all" });
 
+  const CJK_DEFAULT =
+    "天地玄黄宇宙洪荒日月盈昃辰宿列张寒来暑往秋收冬藏闰余成岁律吕调阳云腾致雨露结为霜金生丽水玉出昆冈剑号巨阙珠称夜光";
+  const [tCjk, setTCjk] = useState(CJK_DEFAULT);
   const [w4, setW4] = useState(200);
-  const r4nCjk = truncateByWidth(t4, { maxWidth: w4 });
-  const r4kCjk = truncateByWidth(t4, { maxWidth: w4, wordBreak: "keep-all" });
+  const r4nCjk = truncateByWidth(tCjk, { maxWidth: w4 });
+  const r4kCjk = truncateByWidth(tCjk, { maxWidth: w4, wordBreak: "keep-all" });
 
   const [t5, setT5] = useState(QUICK);
   const [w5, setW5] = useState(350);
@@ -343,8 +337,6 @@ export default function Playground() {
         />
       </Section>
 
-      <Divider />
-
       <Section
         id="lines"
         title="Multi-line truncation"
@@ -362,13 +354,22 @@ export default function Playground() {
           <Slider label="Max lines" value={l2} onChange={setL2} min={1} max={10} />
           <Slider label="Line height" value={lh2} onChange={setLh2} min={16} max={48} suffix="px" />
         </div>
-        <Result>{r2.text}</Result>
+        <div
+          className="p-4 mt-4 ring-1 ring-base/15 overflow-hidden"
+          style={{ height: l2 * lh2 + 32 }}
+        >
+          <T
+            size="m"
+            className="break-words"
+            style={{ lineHeight: lh2 + "px" } as React.CSSProperties}
+          >
+            {r2.text}
+          </T>
+        </div>
         <Code
           code={`truncateByLines(\n  ${JSON.stringify(short(t2))},\n  { maxWidth: ${w2}, lineHeight: ${lh2}, maxLines: ${l2} }\n)`}
         />
       </Section>
-
-      <Divider />
 
       <Section
         id="languages"
@@ -422,16 +423,14 @@ export default function Playground() {
         />
       </Section>
 
-      <Divider />
-
       <Section
         id="cjk"
-        title="Cjk word break"
+        title="CJK word break"
         desc="Pretext supports wordBreak keep-all, preventing breaks inside CJK and Hangul runs. Compare normal vs keep-all on the same text."
       >
         <textarea
-          value={t4}
-          onChange={(e) => setT4(e.target.value)}
+          value={tCjk}
+          onChange={(e) => setTCjk(e.target.value)}
           rows={2}
           className="w-full text-m leading-body p-3 ring-1 ring-base/15 resize-y min-h-[8em] focus:outline-none focus:ring-2 text-base bg-surface"
           aria-label="Sample text"
@@ -454,11 +453,9 @@ export default function Playground() {
           </T>
         </div>
         <Code
-          code={`// normal\ntruncateByWidth(\n  ${JSON.stringify(short(t4))},\n  { maxWidth: ${w4} }\n)\n\n// keep-all\ntruncateByWidth(\n  ${JSON.stringify(short(t4))},\n  { maxWidth: ${w4}, wordBreak: "keep-all" }\n)`}
+          code={`// normal\ntruncateByWidth(\n  ${JSON.stringify(short(tCjk))},\n  { maxWidth: ${w4} }\n)\n\n// keep-all\ntruncateByWidth(\n  ${JSON.stringify(short(tCjk))},\n  { maxWidth: ${w4}, wordBreak: "keep-all" }\n)`}
         />
       </Section>
-
-      <Divider />
 
       <Section
         id="spacing"
@@ -483,8 +480,6 @@ export default function Playground() {
           code={`truncateByWidth(\n  ${JSON.stringify(short(t5))},\n  { maxWidth: ${w5}, letterSpacing: ${s5} }\n)`}
         />
       </Section>
-
-      <Divider />
 
       <Section
         id="factory"

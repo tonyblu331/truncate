@@ -404,7 +404,7 @@ test("maxWidth: works via createTruncator", () => {
 
 test("maxWidth: invalid string throws TypeError", () => {
   expect(() => truncateByWidth("hi", { font: FONT, maxWidth: "abc" as any })).toThrow(TypeError);
-  expect(() => truncateByWidth("hi", { font: FONT, maxWidth: "100%" as any })).toThrow(TypeError);
+  expect(() => truncateByWidth("hi", { font: FONT, maxWidth: "100%" })).toThrow(TypeError);
 });
 
 // ── Judge-requested coverage ───────────────────────────────
@@ -517,4 +517,30 @@ test("maxWidth: leading decimal .5em", () => {
 test("maxWidth: leading decimal .5rem", () => {
   const r = truncateByWidth("hello world", { font: "16px serif", maxWidth: ".5rem" });
   expect(r.text.length).toBeLessThan("hello world".length);
+});
+
+// ── Extended CSS units ─────────────────────────────────
+
+test("maxWidth: ch unit measures zero glyph", () => {
+  const r = truncateByWidth(LONG, { font: "24px serif", maxWidth: "10ch" });
+  expect(r.text.length).toBeLessThan(LONG.length);
+  expect(r.truncated).toBe(true);
+});
+
+test("maxWidth: vw unit", () => {
+  const r = truncateByWidth("hello world", { font: "16px serif", maxWidth: "10vw" });
+  expect(typeof r.text).toBe("string");
+});
+
+test("maxWidth: vh unit", () => {
+  const r = truncateByWidth("hello world", { font: "16px serif", maxWidth: "10vh" });
+  expect(typeof r.text).toBe("string");
+});
+
+test("maxWidth: % throws helpful error", () => {
+  expect(() => truncateByWidth("hi", { font: FONT, maxWidth: "50%" })).toThrow(TypeError);
+});
+
+test("maxWidth: fr throws helpful error", () => {
+  expect(() => truncateByWidth("hi", { font: FONT, maxWidth: "1fr" as any })).toThrow(TypeError);
 });

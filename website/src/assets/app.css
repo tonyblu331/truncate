@@ -8,9 +8,9 @@
   --color-base: oklch(0.14 0.006 270);
   --color-dim: oklch(0.14 0.006 270 / 0.45);
 
-  --text-s: 0.722rem;
+  --text-s: 0.833rem;
   --text-m: 1rem;
-  --text-l: 1.444rem;
+  --text-l: 1.666rem;
 
   --leading-body: 1.7;
   --leading-heading: 1.2;
