@@ -14,13 +14,40 @@ const QUICK = 'The quick brown fox jumps over the lazy dog. Pack my box with fiv
 const LONG = 'Typography is the visual component of the written word. A text must be readable and legible. But more than that, it should convey the tone and voice of the message. The choice of typeface, the spacing between letters and lines, the measure of the column. All of these elements work together to create an experience for the reader. In digital interfaces, truncation becomes a necessary tool when this carefully crafted text exceeds its container. Good truncation preserves meaning while respecting layout constraints.'
 const CJK = '天地玄黄宇宙洪荒日月盈昃辰宿列张寒来暑往秋收冬藏闰余成岁律吕调阳云腾致雨露结为霜金生丽水玉出昆冈剑号巨阙珠称夜光'
 
+const RANGE_CLS = 'w-40 h-px appearance-none bg-base/30 outline-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-base [&::-webkit-slider-thumb]:cursor-pointer'
+
 function Sc({ title, desc, children }: { title: string; desc: string; children: React.ReactNode }) {
   return (
     <section className="mb-12">
-      <h2 className="pb-1 mb-6 ring-0 ring-b-border ring-b-1 text-l leading-heading text-base">{title}</h2>
+      <h2 className="pb-1 mb-6 ring-0 ring-b-border ring-b-1 text-l leading-heading text-base text-balance">{title}</h2>
       <p className="text-s text-base/70 mb-4 leading-body">{desc}</p>
       {children}
     </section>
+  )
+}
+
+function SliderControl({ label, value, onChange, min, max, suffix = '' }: {
+  label: string; value: number; onChange: (v: number) => void; min: number; max: number; suffix?: string
+}) {
+  const id = `slider-${label.replace(/\s+/g, '-').toLowerCase()}`
+  return (
+    <div className="flex flex-col gap-1">
+      <label htmlFor={id} className="font-mono text-s uppercase text-base/70">{label}</label>
+      <div className="flex items-center gap-2">
+        <input id={id} type="range" min={min} max={max} value={value} onChange={e => onChange(+e.target.value)}
+          className={RANGE_CLS} aria-label={label} />
+        <span className="font-mono text-s text-base">{value}{suffix}</span>
+      </div>
+    </div>
+  )
+}
+
+function ResultBox({ children, stats }: { children: React.ReactNode; stats?: string }) {
+  return (
+    <div className="p-4 mt-4 bg-muted ring-1 ring-border min-h-12">
+      <div className="font-sans text-m leading-body break-words">{children}</div>
+      {stats && <div className="font-mono text-s text-base/50 mt-1">{stats}</div>}
+    </div>
   )
 }
 
@@ -77,9 +104,8 @@ export default function Playground() {
 
   return (
     <div className="py-16">
-      {/* hero */}
       <section className="pb-6 mb-12 ring-0 ring-b-border ring-b-1">
-        <h1 className="text-l leading-heading text-base mb-1">Truncate</h1>
+        <h1 className="text-l leading-heading text-base mb-1 text-balance">Truncate</h1>
         <p className="text-s text-base/70 leading-body mb-4">
           Dom-free text truncation. Measure text by pixel width or line count, powered by Pretext.
         </p>
@@ -89,182 +115,81 @@ export default function Playground() {
               <span>$</span> {cmd}
             </CopyButton>
           ))}
-          <a href="https://github.com/tonyblu331/truncate?tab=readme-ov-file#api" className="font-mono text-s px-3 py-1.5 ring-1 ring-border text-base no-underline hover:bg-base hover:text-surface transition-colors ml-auto" target="_blank" rel="noopener">Docs ↗</a>
+          <a href="https://github.com/tonyblu331/truncate?tab=readme-ov-file#api" className="font-mono text-s px-3 py-1.5 ring-1 ring-border text-base no-underline hover:bg-base hover:text-surface transition-colors ml-auto" target="_blank" rel="noreferrer">Docs ↗</a>
         </div>
       </section>
 
-      {/* scenario 1 */}
       <Sc title="Width truncation" desc="Truncate text to fit a pixel width on a single line. Measures each prefix, appends an ellipsis on overflow.">
         <textarea value={t1} onChange={e => setT1(e.target.value)} rows={2}
-          className="w-full font-sans text-m leading-body p-3 bg-surface ring-1 ring-border resize-vertical min-h-[4em] focus:outline-none focus:ring-2" />
+          className="w-full font-sans text-m leading-body p-3 bg-surface ring-1 ring-border resize-y [field-sizing:content] min-h-[4lh] focus:outline-none focus:ring-2" />
         <div className="flex flex-wrap gap-4 mt-4">
-          <label className="flex flex-col gap-1 font-mono text-s uppercase text-base/70">
-            Max width
-            <div className="flex items-center gap-2">
-              <input type="range" min={50} max={600} value={w1} onChange={e => setW1(+e.target.value)}
-                className="w-40 h-px appearance-none bg-base/30 outline-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-base [&::-webkit-slider-thumb]:cursor-pointer" />
-              <span className="font-mono text-s text-base">{w1}px</span>
-            </div>
-          </label>
+          <SliderControl label="Max width" value={w1} onChange={setW1} min={50} max={600} suffix="px" />
         </div>
-        <div className="p-4 mt-4 bg-muted ring-1 ring-border flex items-center min-h-12">
-          <div>
-            <div className="font-sans text-m leading-body break-words">{r1}</div>
-            <div className="font-mono text-s text-base/50 mt-1">{r1.length} chars · {r1.includes('…') ? 'truncated' : 'fits'}</div>
-          </div>
-        </div>
+        <ResultBox stats={`${r1.length} chars · ${r1.includes('…') ? 'truncated' : 'fits'}`}>{r1}</ResultBox>
         <Code code={`import { truncateByWidth } from 'truncate'\n\ntruncateByWidth(\n  ${JSON.stringify(short(t1))},\n  { font: ${JSON.stringify(font)}, maxWidth: ${w1} }\n)\n// → ${JSON.stringify(r1)}`} />
       </Sc>
 
-      {/* scenario 2 */}
       <Sc title="Multi-line truncation" desc="Truncate text within N lines. Full lines above, truncated last line below.">
         <textarea value={t2} onChange={e => setT2(e.target.value)} rows={3}
-          className="w-full font-sans text-m leading-body p-3 bg-surface ring-1 ring-border resize-vertical min-h-[4em] focus:outline-none focus:ring-2" />
+          className="w-full font-sans text-m leading-body p-3 bg-surface ring-1 ring-border resize-y [field-sizing:content] min-h-[4lh] focus:outline-none focus:ring-2" />
         <div className="flex flex-wrap gap-4 mt-4">
-          <label className="flex flex-col gap-1 font-mono text-s uppercase text-base/70">
-            Max width
-            <div className="flex items-center gap-2">
-              <input type="range" min={200} max={700} value={w2} onChange={e => setW2(+e.target.value)}
-                className="w-40 h-px appearance-none bg-base/30 outline-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-base [&::-webkit-slider-thumb]:cursor-pointer" />
-              <span className="font-mono text-s text-base">{w2}px</span>
-            </div>
-          </label>
-          <label className="flex flex-col gap-1 font-mono text-s uppercase text-base/70">
-            Max lines
-            <div className="flex items-center gap-2">
-              <input type="range" min={1} max={10} value={l2} onChange={e => setL2(+e.target.value)}
-                className="w-40 h-px appearance-none bg-base/30 outline-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-base [&::-webkit-slider-thumb]:cursor-pointer" />
-              <span className="font-mono text-s text-base">{l2}</span>
-            </div>
-          </label>
-          <label className="flex flex-col gap-1 font-mono text-s uppercase text-base/70">
-            Line height
-            <div className="flex items-center gap-2">
-              <input type="range" min={16} max={48} value={lh2} onChange={e => setLh2(+e.target.value)}
-                className="w-40 h-px appearance-none bg-base/30 outline-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-base [&::-webkit-slider-thumb]:cursor-pointer" />
-              <span className="font-mono text-s text-base">{lh2}px</span>
-            </div>
-          </label>
+          <SliderControl label="Max width" value={w2} onChange={setW2} min={200} max={700} suffix="px" />
+          <SliderControl label="Max lines" value={l2} onChange={setL2} min={1} max={10} />
+          <SliderControl label="Line height" value={lh2} onChange={setLh2} min={16} max={48} suffix="px" />
         </div>
-        <div className="p-4 mt-4 bg-muted ring-1 ring-border flex items-center min-h-12">
-          <div>
-            <div className="font-sans text-m leading-body break-words">{r2}</div>
-            <div className="font-mono text-s text-base/50 mt-1">{r2.split('\n').length} lines · full height: {h2}px · truncated: {r2.includes('…') ? 'yes' : 'no'}</div>
-          </div>
-        </div>
+        <ResultBox stats={`${r2.split('\n').length} lines · full height: ${h2}px · truncated: ${r2.includes('…') ? 'yes' : 'no'}`}>{r2}</ResultBox>
         <Code code={`import { truncateByLines } from 'truncate'\n\ntruncateByLines(\n  ${JSON.stringify(short(t2))},\n  { font: ${JSON.stringify(font)}, maxWidth: ${w2}, lineHeight: ${lh2}, maxLines: ${l2} }\n)\n// → ${JSON.stringify(r2.split('\n').length > 1 ? r2.split('\n')[0] + '\\n…' : r2)}`} />
       </Sc>
 
-      {/* scenario 3 */}
       <Sc title="Custom ellipsis" desc="Replace the default ellipsis with any string. Useful for localization, show more links, or editorial style guides.">
         <textarea value={t3} onChange={e => setT3(e.target.value)} rows={2}
-          className="w-full font-sans text-m leading-body p-3 bg-surface ring-1 ring-border resize-vertical min-h-[4em] focus:outline-none focus:ring-2" />
+          className="w-full font-sans text-m leading-body p-3 bg-surface ring-1 ring-border resize-y [field-sizing:content] min-h-[4lh] focus:outline-none focus:ring-2" />
         <div className="flex flex-wrap gap-4 mt-4">
-          <label className="flex flex-col gap-1 font-mono text-s uppercase text-base/70">
-            Max width
-            <div className="flex items-center gap-2">
-              <input type="range" min={50} max={600} value={w3} onChange={e => setW3(+e.target.value)}
-                className="w-40 h-px appearance-none bg-base/30 outline-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-base [&::-webkit-slider-thumb]:cursor-pointer" />
-              <span className="font-mono text-s text-base">{w3}px</span>
-            </div>
-          </label>
-          <label className="flex flex-col gap-1 font-mono text-s uppercase text-base/70">
-            Ellipsis
-            <input type="text" value={e3} onChange={e => setE3(e.target.value)}
+          <SliderControl label="Max width" value={w3} onChange={setW3} min={50} max={600} suffix="px" />
+          <div className="flex flex-col gap-1">
+            <label htmlFor="ellipsis-input" className="font-mono text-s uppercase text-base/70">Ellipsis</label>
+            <input id="ellipsis-input" type="text" value={e3} onChange={e => setE3(e.target.value)}
               className="font-mono text-s px-2 py-1 bg-surface ring-1 ring-border text-base w-32 focus:outline-none focus:ring-2" />
-          </label>
-        </div>
-        <div className="p-4 mt-4 bg-muted ring-1 ring-border flex items-center min-h-12">
-          <div>
-            <div className="font-sans text-m leading-body break-words">{r3}</div>
-            <div className="font-mono text-s text-base/50 mt-1">ellipsis: {JSON.stringify(e3)}</div>
           </div>
         </div>
+        <ResultBox stats={`ellipsis: ${JSON.stringify(e3)}`}>{r3}</ResultBox>
         <Code code={`import { truncateByWidth } from 'truncate'\n\ntruncateByWidth(\n  ${JSON.stringify(short(t3))},\n  { font: ${JSON.stringify(font)}, maxWidth: ${w3}, ellipsis: ${JSON.stringify(e3)} }\n)\n// → ${JSON.stringify(r3)}`} />
       </Sc>
 
-      {/* scenario 4 */}
       <Sc title="CJK word break" desc="Pretext supports wordBreak keep-all, preventing breaks inside CJK and Hangul runs. Compare normal vs keep-all on the same text.">
         <textarea value={t4} onChange={e => setT4(e.target.value)} rows={2}
-          className="w-full font-sans text-m leading-body p-3 bg-surface ring-1 ring-border resize-vertical min-h-[4em] focus:outline-none focus:ring-2" />
+          className="w-full font-sans text-m leading-body p-3 bg-surface ring-1 ring-border resize-y [field-sizing:content] min-h-[4lh] focus:outline-none focus:ring-2" />
         <div className="flex flex-wrap gap-4 mt-4">
-          <label className="flex flex-col gap-1 font-mono text-s uppercase text-base/70">
-            Max width
-            <div className="flex items-center gap-2">
-              <input type="range" min={50} max={500} value={w4} onChange={e => setW4(+e.target.value)}
-                className="w-40 h-px appearance-none bg-base/30 outline-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-base [&::-webkit-slider-thumb]:cursor-pointer" />
-              <span className="font-mono text-s text-base">{w4}px</span>
-            </div>
-          </label>
+          <SliderControl label="Max width" value={w4} onChange={setW4} min={50} max={500} suffix="px" />
         </div>
-        <div className="p-4 mt-4 bg-muted ring-1 ring-border flex items-center min-h-12">
-          <div>
-            <div className="font-mono text-s text-base/50 mb-1">Normal</div>
-            <div className="font-sans text-m leading-body break-words">{r4n}</div>
-            <div className="font-mono text-s text-base/50 mt-3 mb-1">Keep all</div>
-            <div className="font-sans text-m leading-body break-words">{r4k}</div>
-          </div>
+        <div className="p-4 mt-4 bg-muted ring-1 ring-border">
+          <div className="font-mono text-s text-base/50 mb-1">Normal</div>
+          <div className="font-sans text-m leading-body break-words">{r4n}</div>
+          <div className="font-mono text-s text-base/50 mt-3 mb-1">Keep all</div>
+          <div className="font-sans text-m leading-body break-words">{r4k}</div>
         </div>
         <Code code={`import { truncateByWidth } from 'truncate'\n\n// normal (default)\ntruncateByWidth(\n  ${JSON.stringify(short(t4))},\n  { font: ${JSON.stringify(font)}, maxWidth: ${w4} }\n)\n// → ${JSON.stringify(r4n)}\n\n// keep-all\ntruncateByWidth(\n  ${JSON.stringify(short(t4))},\n  { font: ${JSON.stringify(font)}, maxWidth: ${w4}, wordBreak: "keep-all" }\n)\n// → ${JSON.stringify(r4k)}`} />
       </Sc>
 
-      {/* scenario 5 */}
       <Sc title="Letter spacing" desc="Pass letterSpacing in CSS px to match your design. Wider spacing makes text take up more horizontal room, so truncation kicks in sooner.">
         <textarea value={t5} onChange={e => setT5(e.target.value)} rows={2}
-          className="w-full font-sans text-m leading-body p-3 bg-surface ring-1 ring-border resize-vertical min-h-[4em] focus:outline-none focus:ring-2" />
+          className="w-full font-sans text-m leading-body p-3 bg-surface ring-1 ring-border resize-y [field-sizing:content] min-h-[4lh] focus:outline-none focus:ring-2" />
         <div className="flex flex-wrap gap-4 mt-4">
-          <label className="flex flex-col gap-1 font-mono text-s uppercase text-base/70">
-            Max width
-            <div className="flex items-center gap-2">
-              <input type="range" min={50} max={600} value={w5} onChange={e => setW5(+e.target.value)}
-                className="w-40 h-px appearance-none bg-base/30 outline-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-base [&::-webkit-slider-thumb]:cursor-pointer" />
-              <span className="font-mono text-s text-base">{w5}px</span>
-            </div>
-          </label>
-          <label className="flex flex-col gap-1 font-mono text-s uppercase text-base/70">
-            Letter spacing
-            <div className="flex items-center gap-2">
-              <input type="range" min={0} max={12} value={s5} onChange={e => setS5(+e.target.value)}
-                className="w-40 h-px appearance-none bg-base/30 outline-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-base [&::-webkit-slider-thumb]:cursor-pointer" />
-              <span className="font-mono text-s text-base">{s5}px</span>
-            </div>
-          </label>
+          <SliderControl label="Max width" value={w5} onChange={setW5} min={50} max={600} suffix="px" />
+          <SliderControl label="Letter spacing" value={s5} onChange={setS5} min={0} max={12} suffix="px" />
         </div>
-        <div className="p-4 mt-4 bg-muted ring-1 ring-border flex items-center min-h-12">
-          <div>
-            <div className="font-sans text-m leading-body break-words" style={{ letterSpacing: s5 + 'px' }}>{r5}</div>
-            <div className="font-mono text-s text-base/50 mt-1">letter-spacing: {s5}px</div>
-          </div>
-        </div>
+        <ResultBox stats={`letter-spacing: ${s5}px`}>
+          <span style={{ letterSpacing: s5 + 'px' }}>{r5}</span>
+        </ResultBox>
         <Code code={`import { truncateByWidth } from 'truncate'\n\ntruncateByWidth(\n  ${JSON.stringify(short(t5))},\n  { font: ${JSON.stringify(font)}, maxWidth: ${w5}, letterSpacing: ${s5} }\n)\n// → ${JSON.stringify(r5)}`} />
       </Sc>
 
-      {/* scenario 6 */}
       <Sc title="Create truncator factory" desc="Pre-configure font and defaults with createTruncator. All methods inherit the config, no repetition.">
         <div className="flex flex-wrap gap-4 mt-4">
-          <label className="flex flex-col gap-1 font-mono text-s uppercase text-base/70">
-            Max width
-            <div className="flex items-center gap-2">
-              <input type="range" min={200} max={700} value={w6} onChange={e => setW6(+e.target.value)}
-                className="w-40 h-px appearance-none bg-base/30 outline-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-base [&::-webkit-slider-thumb]:cursor-pointer" />
-              <span className="font-mono text-s text-base">{w6}px</span>
-            </div>
-          </label>
-          <label className="flex flex-col gap-1 font-mono text-s uppercase text-base/70">
-            Max lines
-            <div className="flex items-center gap-2">
-              <input type="range" min={1} max={8} value={l6} onChange={e => setL6(+e.target.value)}
-                className="w-40 h-px appearance-none bg-base/30 outline-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-base [&::-webkit-slider-thumb]:cursor-pointer" />
-              <span className="font-mono text-s text-base">{l6}</span>
-            </div>
-          </label>
+          <SliderControl label="Max width" value={w6} onChange={setW6} min={200} max={700} suffix="px" />
+          <SliderControl label="Max lines" value={l6} onChange={setL6} min={1} max={8} />
         </div>
-        <div className="p-4 mt-4 bg-muted ring-1 ring-border flex items-center min-h-12">
-          <div>
-            <div className="font-sans text-m leading-body break-words">{r6}</div>
-            <div className="font-mono text-s text-base/50 mt-1">via createTruncator({' font, lineHeight: 28 '})</div>
-          </div>
-        </div>
+        <ResultBox stats={`via createTruncator({ font, lineHeight: 28 })`}>{r6}</ResultBox>
         <Code code={`import { createTruncator } from 'truncate'\n\nconst t = createTruncator({\n  font: ${JSON.stringify(font)},\n  lineHeight: 28,\n})\n\nt.truncateByLines(\n  ${JSON.stringify(short(LONG))},\n  { maxWidth: ${w6}, maxLines: ${l6} }\n)\n// → ${JSON.stringify(r6.split('\n').length > 1 ? r6.split('\n')[0] + '\\n…' : r6)}`} />
       </Sc>
     </div>

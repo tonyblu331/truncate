@@ -16,7 +16,7 @@ export function CopyButton({ text, children, className }: Props) {
   }
 
   return (
-    <button onClick={handle} className={className}>
+    <button type="button" onClick={handle} className={className}>
       {copied ? 'copied!' : children}
     </button>
   )
