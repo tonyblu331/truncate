@@ -35,6 +35,7 @@ export interface TruncatorConfig {
 export interface Truncator {
   truncateByWidth(text: string, options?: Omit<TruncateOptions, 'font'>): string
   truncateByLines(text: string, options?: Omit<TruncateOptions, 'font'>): string
+  truncateMiddle(text: string, options?: Omit<TruncateOptions, 'font'>): string
   measureHeight(text: string, options?: Omit<MeasureOptions, 'font'>): number
   truncate(text: string, options?: Omit<TruncateOptions, 'font'>): string
 }
@@ -135,6 +136,36 @@ export function measureHeight(text: string, options: MeasureOptions): number {
   return Math.max(height, options.lineHeight)
 }
 
+export function truncateMiddle(text: string, options: TruncateOptions): string {
+  const ellipsis = pickEllipsis(options)
+  if (!text) return ''
+  const extras = extractExtras(options)
+  const { font, maxWidth } = options
+  if (maxWidth <= 0) return ''
+
+  if (lineCount(text, font, maxWidth, extras) <= 1) return text
+
+  const n = text.length
+  let lo = 0
+  let hi = n
+
+  while (lo < hi) {
+    const mid = Math.ceil((lo + hi) / 2)
+    const prefixLen = Math.ceil(mid / 2)
+    const suffixLen = Math.floor(mid / 2)
+    const candidate = text.slice(0, prefixLen) + ellipsis + text.slice(n - suffixLen)
+    if (lineCount(candidate, font, maxWidth, extras) <= 1) {
+      lo = mid
+    } else {
+      hi = mid - 1
+    }
+  }
+
+  const prefixLen = Math.ceil(lo / 2)
+  const suffixLen = Math.floor(lo / 2)
+  return text.slice(0, prefixLen) + ellipsis + text.slice(n - suffixLen)
+}
+
 export function truncate(text: string, options: TruncateOptions): string {
   return options.maxLines !== undefined
     ? truncateByLines(text, options)
@@ -158,6 +189,9 @@ export function createTruncator(config: TruncatorConfig): Truncator {
     },
     measureHeight(text, opts) {
       return measureHeight(text, { font: config.font, ...defaults, ...opts } as MeasureOptions)
+    },
+    truncateMiddle(text, opts) {
+      return truncateMiddle(text, { font: config.font, ...defaults, ...opts } as TruncateOptions)
     },
     truncate(text, opts) {
       return truncate(text, { font: config.font, ...defaults, ...opts } as TruncateOptions)

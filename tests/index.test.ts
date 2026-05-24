@@ -2,6 +2,7 @@ import { expect, test } from "vite-plus/test";
 import {
   truncateByWidth,
   truncateByLines,
+  truncateMiddle,
   measureHeight,
   truncate,
   createTruncator,
@@ -214,4 +215,30 @@ test("edge: newlines in truncateByWidth with pre-wrap", () => {
   const result = truncateByWidth(multi, { font: FONT, maxWidth: WIDE, whiteSpace: "pre-wrap" });
   expect(result).toMatch(/^line one/);
   expect(result.split("\n").length).toBe(1);
+});
+
+// ── truncateMiddle ─────────────────────────────────────────────
+
+test("truncateMiddle: short text fits", () => {
+  expect(truncateMiddle("hi", { font: FONT, maxWidth: WIDE })).toBe("hi");
+});
+
+test("truncateMiddle: empty string", () => {
+  expect(truncateMiddle("", { font: FONT, maxWidth: WIDE })).toBe("");
+});
+
+test("truncateMiddle: maxWidth=0 returns empty", () => {
+  expect(truncateMiddle("hello", { font: FONT, maxWidth: 0 })).toBe("");
+});
+
+test("truncateMiddle: long text has ellipsis in middle", () => {
+  const result = truncateMiddle("user@example.com", { font: FONT, maxWidth: 80 });
+  expect(result.length).toBeLessThan("user@example.com".length);
+  expect(result).toMatch(/…/);
+  expect(result.startsWith("user")).toBe(true);
+});
+
+test("truncateMiddle: custom ellipsis", () => {
+  const result = truncateMiddle("hello world this is a test", { font: FONT, maxWidth: 80, ellipsis: "..." });
+  expect(result).toMatch(/\.\.\./);
 });
