@@ -16,7 +16,7 @@
   --leading-heading: 1.2;
 }
 
-html { font-size: 18px; }
+html { font-size: 18px; scroll-behavior: smooth; }
 
 body {
   font-family: var(--font-sans);

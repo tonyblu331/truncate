@@ -300,14 +300,18 @@ export default function Playground() {
             </label>
           ))}
         </div>
-        <div className="mt-4 space-y-2">
-          {Array.from(activeSels).map(s => (
-            <div key={s} className="p-3 ring-1 ring-base/15">
-              <T role="dim" size="s" mono className="mr-2">{s}</T>
-              <T size="m" className="leading-body break-words">{results[s as keyof typeof results]}</T>
-            </div>
-          ))}
-          {activeSels.size === 0 && <T role="dim" size="m" className="leading-body">Toggle a selector above to see results</T>}
+        <div className="p-4 mt-4 ring-1 ring-base/15">
+          {activeSels.size === 0
+            ? <T role="dim" size="m">Toggle a selector above</T>
+            : Array.from(activeSels).map((s, i) => (
+                <div key={s}>
+                  {i > 0 && <hr className="my-3 ring-0 ring-t-base/15 ring-t-1" />}
+                  <div className="flex items-baseline gap-2">
+                    <T role="dim" size="s" mono className="shrink-0">{s}</T>
+                    <T size="m" className="leading-body break-words">{results[s as keyof typeof results]}</T>
+                  </div>
+                </div>
+              ))}
         </div>
         <Code code={`const tBody = createTruncator({ selector: 'body', lineHeight: 28 })\nconst tH1   = createTruncator({ selector: 'h1', lineHeight: 28 })\nconst tCode = createTruncator({ selector: 'code', lineHeight: 28 })\n\ntBody.truncateByLines(\n  ${JSON.stringify(short(LONG))},\n  { maxWidth: ${w6}, maxLines: ${l6} }\n)\n// 18px Geist`} />
       </Section>
