@@ -38,6 +38,7 @@ export interface TruncatorConfig {
 export interface Truncator {
   truncateByWidth(text: string, options?: Omit<TruncateOptions, 'font'>): string
   truncateByLines(text: string, options?: Omit<TruncateOptions, 'font'>): string
+  truncateStart(text: string, options?: Omit<TruncateOptions, 'font'>): string
   truncateMiddle(text: string, options?: Omit<TruncateOptions, 'font'>): string
   measureHeight(text: string, options?: Omit<MeasureOptions, 'font'>): number
   truncate(text: string, options?: Omit<TruncateOptions, 'font'>): string
@@ -213,6 +214,29 @@ export function truncateMiddle(text: string, options: TruncateOptions): string {
   return text.slice(0, prefixLen) + ellipsis + text.slice(n - suffixLen)
 }
 
+export function truncateStart(text: string, options: TruncateOptions): string {
+  const ellipsis = pickEllipsis(options)
+  if (!text) return ''
+  const extras = extractExtras(options)
+  const font = resolveFont(options)
+  const { maxWidth } = options
+  if (maxWidth <= 0) return ''
+
+  if (lineCount(text, font, maxWidth, extras) <= 1) return text
+
+  let lo = 0
+  let hi = text.length
+  while (lo < hi) {
+    const mid = Math.ceil((lo + hi) / 2)
+    if (lineCount(ellipsis + text.slice(-mid), font, maxWidth, extras) <= 1) {
+      lo = mid
+    } else {
+      hi = mid - 1
+    }
+  }
+  return ellipsis + text.slice(-lo)
+}
+
 export function truncate(text: string, options: TruncateOptions): string {
   return options.maxLines !== undefined
     ? truncateByLines(text, options)
@@ -239,6 +263,9 @@ export function createTruncator(config: TruncatorConfig): Truncator {
     },
     measureHeight(text, opts) {
       return measureHeight(text, { ...defaults, ...opts } as MeasureOptions)
+    },
+    truncateStart(text, opts) {
+      return truncateStart(text, { ...defaults, ...opts } as TruncateOptions)
     },
     truncateMiddle(text, opts) {
       return truncateMiddle(text, { ...defaults, ...opts } as TruncateOptions)

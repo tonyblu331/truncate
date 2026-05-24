@@ -1,5 +1,5 @@
 import { useState, type ReactNode } from 'react'
-import { truncateByWidth, truncateByLines, truncateMiddle, measureHeight, createTruncator, detectFont, register } from 'truncate'
+import { truncateByWidth, truncateByLines, truncateStart, truncateMiddle, measureHeight, createTruncator, detectFont, register } from 'truncate'
 
 detectFont()
 
@@ -22,15 +22,15 @@ const URL = 'https://github.com/tonyblu331/truncate/blob/main/src/truncate.ts'
 const SCENARIOS = [
   { id: 'width', label: 'Width' },
   { id: 'lines', label: 'Lines' },
-  { id: 'ellipsis', label: 'Ellipsis' },
+  { id: 'position', label: 'Position' },
   { id: 'cjk', label: 'Cjk' },
-  { id: 'middle', label: 'Middle' },
   { id: 'spacing', label: 'Spacing' },
   { id: 'factory', label: 'Factory' },
 ]
 
 const RANGE_CLS = 'w-40 h-px appearance-none bg-base/35 outline-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-base [&::-webkit-slider-thumb]:cursor-pointer'
 const BTN_CLS = 'font-mono text-s px-3 py-1.5 ring-1 ring-base/15 text-base no-underline cursor-pointer hover:bg-base hover:text-surface transition-colors'
+const RADIO_CLS = 'appearance-none w-3 h-3 rounded-full ring-1 ring-base mr-1.5 cursor-pointer checked:bg-base'
 
 type Role = 'primary' | 'secondary' | 'dim'
 type Sz = 's' | 'm' | 'l'
@@ -80,11 +80,10 @@ function Slider({ label, value, onChange, min, max, suffix = '' }: {
   )
 }
 
-function Result({ children, stats }: { children: ReactNode; stats?: string }) {
+function Result({ children }: { children: ReactNode }) {
   return (
     <div className="p-4 mt-4 ring-1 ring-base/15 min-h-12">
       <T size="m" className="leading-body break-words">{children}</T>
-      {stats && <T role="dim" size="s" mono className="mt-1">{stats}</T>}
     </div>
   )
 }
@@ -95,7 +94,7 @@ function Code({ code }: { code: string }) {
     <div className="relative mt-4">
       <pre className="font-mono text-s leading-relaxed ring-1 ring-base/15 p-4 pt-8 overflow-x-auto">
         <button type="button" onClick={async () => { await navigator.clipboard.writeText(code); setCopied(true); setTimeout(() => setCopied(false), 1500) }}
-          className="absolute -top-px right-0 font-mono text-s px-2 py-0.5 ring-1 ring-base/15 bg-surface text-dim hover:text-base">
+          className="absolute -top-px right-0 font-mono text-s px-2 py-0.5 ring-1 ring-base bg-surface text-base hover:bg-base hover:text-surface">
           {copied ? 'copied' : 'copy'}
         </button>
         <code>{code}</code>
@@ -120,29 +119,28 @@ export default function Playground() {
   const r2 = truncateByLines(t2, { maxWidth: w2, lineHeight: lh2, maxLines: l2 })
   const h2 = measureHeight(t2, { maxWidth: w2, lineHeight: lh2 })
 
-  const [t3, setT3] = useState(QUICK)
-  const [e3, setE3] = useState('…')
-  const [w3, setW3] = useState(300)
-  const r3 = truncateByWidth(t3, { maxWidth: w3, ellipsis: e3 })
+  const [tp, setTp] = useState(QUICK)
+  const [wp, setWp] = useState(300)
+  const [ep, setEp] = useState('…')
+  const [mode, setMode] = useState<'start' | 'middle' | 'end'>('end')
+  const rs = truncateStart(tp, { maxWidth: wp, ellipsis: ep })
+  const rm = truncateMiddle(tp, { maxWidth: wp, ellipsis: ep })
+  const re = truncateByWidth(tp, { maxWidth: wp, ellipsis: ep })
 
   const [t4, setT4] = useState(CJK)
   const [w4, setW4] = useState(200)
   const r4n = truncateByWidth(t4, { maxWidth: w4 })
   const r4k = truncateByWidth(t4, { maxWidth: w4, wordBreak: 'keep-all' })
 
-  const [t5, setT5] = useState(URL)
-  const [w5, setW5] = useState(200)
-  const r5 = truncateMiddle(t5, { maxWidth: w5 })
+  const [t5, setT5] = useState(QUICK)
+  const [w5, setW5] = useState(350)
+  const [s5, setS5] = useState(3)
+  const r5 = truncateByWidth(t5, { maxWidth: w5, letterSpacing: s5 })
 
-  const [t6, setT6] = useState(QUICK)
-  const [w6, setW6] = useState(350)
-  const [s6, setS6] = useState(3)
-  const r6 = truncateByWidth(t6, { maxWidth: w6, letterSpacing: s6 })
-
-  const [w7, setW7] = useState(400)
-  const [l7, setL7] = useState(2)
+  const [w6, setW6] = useState(400)
+  const [l6, setL6] = useState(2)
   const Tfac = createTruncator({ selector: 'body', lineHeight: 28 })
-  const r7 = Tfac.truncateByLines(LONG, { maxWidth: w7, maxLines: l7 })
+  const r6 = Tfac.truncateByLines(LONG, { maxWidth: w6, maxLines: l6 })
 
   return (
     <div>
@@ -159,7 +157,7 @@ export default function Playground() {
           ))}
         </div>
         <div className="flex flex-wrap gap-2">
-          <T role="dim" size="s" mono>Bundle ~1.5 kB gzip</T>
+          <T role="dim" size="s" mono>Bundle ~1.6 kB gzip</T>
           <T role="dim" size="s" mono className="text-base/15">/</T>
           <a href="https://github.com/tonyblu331/truncate?tab=readme-ov-file#api" target="_blank" rel="noreferrer">
             <T role="secondary" size="s" mono as="span" className="underline underline-offset-2 hover:text-base">Docs</T>
@@ -185,7 +183,7 @@ export default function Playground() {
         <div className="flex flex-wrap gap-4 mt-4">
           <Slider label="Max width" value={w1} onChange={setW1} min={50} max={600} suffix="px" />
         </div>
-        <Result stats={`${r1.length} chars - ${r1.includes('…') ? 'truncated' : 'fits'}`}>{r1}</Result>
+        <Result>{r1}</Result>
         <Code code={`truncateByWidth(\n  ${JSON.stringify(short(t1))},\n  { maxWidth: ${w1} }\n)`} />
       </Section>
 
@@ -199,31 +197,46 @@ export default function Playground() {
           <Slider label="Max lines" value={l2} onChange={setL2} min={1} max={10} />
           <Slider label="Line height" value={lh2} onChange={setLh2} min={16} max={48} suffix="px" />
         </div>
-        <Result stats={`${r2.split('\n').length} lines - full height: ${h2}px - truncated: ${r2.includes('…') ? 'yes' : 'no'}`}>{r2}</Result>
+        <Result>{r2}</Result>
         <Code code={`truncateByLines(\n  ${JSON.stringify(short(t2))},\n  { maxWidth: ${w2}, lineHeight: ${lh2}, maxLines: ${l2} }\n)`} />
       </Section>
 
       <Divider />
 
-      <Section id="ellipsis" title="Custom ellipsis" desc="Replace the default ellipsis with any string. Useful for localization, show more links, or editorial style guides.">
-        <textarea value={t3} onChange={e => setT3(e.target.value)} rows={2}
+      <Section id="position" title="Position" desc="Choose where the ellipsis goes. Start, middle, or end. Mix truncation modes with a custom ellipsis character.">
+        <textarea value={tp} onChange={e => setTp(e.target.value)} rows={2}
           className="w-full text-m leading-body p-3 ring-1 ring-base/15 resize-y min-h-[7em] focus:outline-none focus:ring-2 text-base bg-surface" aria-label="Sample text" />
         <div className="flex flex-wrap gap-4 mt-4">
-          <Slider label="Max width" value={w3} onChange={setW3} min={50} max={600} suffix="px" />
+          <Slider label="Max width" value={wp} onChange={setWp} min={50} max={600} suffix="px" />
           <div className="flex flex-col gap-1">
-            <label htmlFor="ellipsis-input" className="font-mono text-s text-dim uppercase">Ellipsis</label>
-            <input id="ellipsis-input" type="text" value={e3} onChange={e => setE3(e.target.value)}
+            <label htmlFor="ellipsis-pos" className="font-mono text-s text-dim uppercase">Ellipsis</label>
+            <input id="ellipsis-pos" type="text" value={ep} onChange={e => setEp(e.target.value)}
               className="font-mono text-s px-2 py-1 ring-1 ring-base/15 text-base w-32 focus:outline-none focus:ring-2 bg-surface" aria-label="Ellipsis text" />
           </div>
         </div>
-        <div className="flex flex-wrap gap-2 mt-2">
-          {['…', ' ➡', ' 👉', ' [more]', ' ...'].map(ell => (
-            <button key={ell} type="button" onClick={() => setE3(ell)}
-              className={`font-mono text-s px-3 py-1.5 ring-1 ring-base/15 text-base cursor-pointer hover:bg-base hover:text-surface transition-colors ${e3 === ell ? 'bg-base text-surface' : 'bg-surface'}`}>{ell || 'empty'}</button>
+        <div className="flex flex-wrap gap-x-6 gap-y-1 mt-3">
+          {(['start', 'middle', 'end'] as const).map(m => (
+            <label key={m} className="flex items-center font-mono text-s text-dim cursor-pointer capitalize">
+              <input type="radio" name="mode" value={m} checked={mode === m} onChange={() => setMode(m)} className={RADIO_CLS} />
+              {m}
+            </label>
           ))}
         </div>
-        <Result stats={`ellipsis: ${JSON.stringify(e3)}`}>{r3}</Result>
-        <Code code={`truncateByWidth(\n  ${JSON.stringify(short(t3))},\n  { maxWidth: ${w3}, ellipsis: ${JSON.stringify(e3)} }\n)`} />
+        <div className="mt-4 space-y-2">
+          <div className="p-3 ring-1 ring-base/15">
+            <T role="dim" size="s" mono className="mr-2">Start</T>
+            <T size="m" className="leading-body break-words">{rs}</T>
+          </div>
+          <div className="p-3 ring-1 ring-base/15">
+            <T role="dim" size="s" mono className="mr-2">Middle</T>
+            <T size="m" className="leading-body break-words">{rm}</T>
+          </div>
+          <div className="p-3 ring-1 ring-base/15">
+            <T role="dim" size="s" mono className="mr-2">End</T>
+            <T size="m" className="leading-body break-words">{re}</T>
+          </div>
+        </div>
+        <Code code={`// start\ntruncateStart(\n  ${JSON.stringify(short(tp))},\n  { maxWidth: ${wp}, ellipsis: ${JSON.stringify(ep)} }\n)\n\n// middle\ntruncateMiddle(\n  ${JSON.stringify(short(tp))},\n  { maxWidth: ${wp}, ellipsis: ${JSON.stringify(ep)} }\n)\n\n// end\ntruncateByWidth(\n  ${JSON.stringify(short(tp))},\n  { maxWidth: ${wp}, ellipsis: ${JSON.stringify(ep)} }\n)`} />
       </Section>
 
       <Divider />
@@ -245,40 +258,28 @@ export default function Playground() {
 
       <Divider />
 
-      <Section id="middle" title="Middle truncation" desc="Truncate text in the middle, keeping both start and end. Ideal for URLs, file paths, and account identifiers.">
+      <Section id="spacing" title="Letter spacing" desc="Pass letterSpacing in CSS px to match your design. Wider spacing makes text take up more horizontal room, so truncation kicks in sooner.">
         <textarea value={t5} onChange={e => setT5(e.target.value)} rows={2}
           className="w-full text-m leading-body p-3 ring-1 ring-base/15 resize-y min-h-[7em] focus:outline-none focus:ring-2 text-base bg-surface" aria-label="Sample text" />
         <div className="flex flex-wrap gap-4 mt-4">
           <Slider label="Max width" value={w5} onChange={setW5} min={50} max={600} suffix="px" />
+          <Slider label="Letter spacing" value={s5} onChange={setS5} min={0} max={12} suffix="px" />
         </div>
-        <Result stats={`${r5.length} chars - ${r5.includes('…') ? 'truncated' : 'fits'}`}>{r5}</Result>
-        <Code code={`truncateMiddle(\n  ${JSON.stringify(short(t5))},\n  { maxWidth: ${w5} }\n)`} />
-      </Section>
-
-      <Divider />
-
-      <Section id="spacing" title="Letter spacing" desc="Pass letterSpacing in CSS px to match your design. Wider spacing makes text take up more horizontal room, so truncation kicks in sooner.">
-        <textarea value={t6} onChange={e => setT6(e.target.value)} rows={2}
-          className="w-full text-m leading-body p-3 ring-1 ring-base/15 resize-y min-h-[7em] focus:outline-none focus:ring-2 text-base bg-surface" aria-label="Sample text" />
-        <div className="flex flex-wrap gap-4 mt-4">
-          <Slider label="Max width" value={w6} onChange={setW6} min={50} max={600} suffix="px" />
-          <Slider label="Letter spacing" value={s6} onChange={setS6} min={0} max={12} suffix="px" />
-        </div>
-        <Result stats={`letter-spacing: ${s6}px`}>
-          <span style={{ letterSpacing: s6 + 'px' }}>{r6}</span>
+        <Result>
+          <span style={{ letterSpacing: s5 + 'px' }}>{r5}</span>
         </Result>
-        <Code code={`truncateByWidth(\n  ${JSON.stringify(short(t6))},\n  { maxWidth: ${w6}, letterSpacing: ${s6} }\n)`} />
+        <Code code={`truncateByWidth(\n  ${JSON.stringify(short(t5))},\n  { maxWidth: ${w5}, letterSpacing: ${s5} }\n)`} />
       </Section>
 
       <Divider />
 
       <Section id="factory" title="Truncator factory" desc="Pre-configure defaults via createTruncator. All methods inherit the config. Registry-based selectors resolve fonts globally.">
         <div className="flex flex-wrap gap-4 mt-4">
-          <Slider label="Max width" value={w7} onChange={setW7} min={200} max={700} suffix="px" />
-          <Slider label="Max lines" value={l7} onChange={setL7} min={1} max={8} />
+          <Slider label="Max width" value={w6} onChange={setW6} min={200} max={700} suffix="px" />
+          <Slider label="Max lines" value={l6} onChange={setL6} min={1} max={8} />
         </div>
-        <Result stats={`via createTruncator({ selector: 'body', lineHeight: 28 })`}>{r7}</Result>
-        <Code code={`const t = createTruncator({\n  selector: 'body',\n  lineHeight: 28,\n})\n\nt.truncateByLines(\n  ${JSON.stringify(short(LONG))},\n  { maxWidth: ${w7}, maxLines: ${l7} }\n)`} />
+        <Result>{r6}</Result>
+        <Code code={`const t = createTruncator({\n  selector: 'body',\n  lineHeight: 28,\n})\n\nt.truncateByLines(\n  ${JSON.stringify(short(LONG))},\n  { maxWidth: ${w6}, maxLines: ${l6} }\n)`} />
       </Section>
     </div>
   )

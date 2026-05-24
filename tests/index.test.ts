@@ -3,6 +3,7 @@ import {
   truncateByWidth,
   truncateByLines,
   truncateMiddle,
+  truncateStart,
   measureHeight,
   truncate,
   createTruncator,
@@ -241,4 +242,29 @@ test("truncateMiddle: long text has ellipsis in middle", () => {
 test("truncateMiddle: custom ellipsis", () => {
   const result = truncateMiddle("hello world this is a test", { font: FONT, maxWidth: 80, ellipsis: "..." });
   expect(result).toMatch(/\.\.\./);
+});
+
+// ── truncateStart ──────────────────────────────────────────────
+
+test("truncateStart: short text fits", () => {
+  expect(truncateStart("hi", { font: FONT, maxWidth: WIDE })).toBe("hi");
+});
+
+test("truncateStart: empty string", () => {
+  expect(truncateStart("", { font: FONT, maxWidth: WIDE })).toBe("");
+});
+
+test("truncateStart: maxWidth=0 returns empty", () => {
+  expect(truncateStart("hello", { font: FONT, maxWidth: 0 })).toBe("");
+});
+
+test("truncateStart: long text has ellipsis at start", () => {
+  const result = truncateStart(LONG, { font: FONT, maxWidth: NARROW });
+  expect(result.length).toBeLessThan(LONG.length);
+  expect(result.startsWith("…")).toBe(true);
+});
+
+test("truncateStart: custom ellipsis at start", () => {
+  const result = truncateStart(LONG, { font: FONT, maxWidth: NARROW, ellipsis: "..." });
+  expect(result.startsWith("...")).toBe(true);
 });
