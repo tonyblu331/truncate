@@ -31,7 +31,7 @@ body {
 
 .content-grid {
   display: grid;
-  grid-template-columns: 1fr minmax(auto, 24ch) 1fr;
+  grid-template-columns: 1fr minmax(auto, 72ch) 1fr;
 }
 
 .content-grid > * {
