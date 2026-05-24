@@ -77,7 +77,7 @@ export default function Home() {
     <div>
       <section className="hero">
         <h1>truncate</h1>
-        <p>DOM-free text truncation powered by Pretext. Measure &amp; truncate text by pixel width or line count &mdash; no browser layout, no flickering, no guesswork.</p>
+        <p>DOM-free text truncation powered by Pretext. Measure &amp; truncate text by pixel width or line count. No browser layout, no flickering, no guesswork.</p>
         <div className="install-bar">
           {INSTALL.map(({ label, cmd }) => (
             <CopyButton key={label} text={cmd}>
