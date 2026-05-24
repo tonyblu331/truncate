@@ -226,19 +226,19 @@ export default function Playground() {
       ? createTruncator({ selector: "body", lineHeight: 28 }).truncateByLines(LONG, {
           maxWidth: w6,
           maxLines: l6,
-        })
+        }).text
       : LONG,
     h1: activeSels.has("h1")
       ? createTruncator({ selector: "h1", lineHeight: 28 }).truncateByLines(LONG, {
           maxWidth: w6,
           maxLines: l6,
-        })
+        }).text
       : LONG,
     code: activeSels.has("code")
       ? createTruncator({ selector: "code", lineHeight: 28 }).truncateByLines(LONG, {
           maxWidth: w6,
           maxLines: l6,
-        })
+        }).text
       : LONG,
   };
   const toggle = (s: string) => {
@@ -337,7 +337,7 @@ export default function Playground() {
         <div className="flex flex-wrap gap-4 mt-4">
           <Slider label="Max width" value={w1} onChange={setW1} min={50} max={600} suffix="px" />
         </div>
-        <Result>{r1}</Result>
+        <Result>{r1.text}</Result>
         <Code
           code={`truncateByWidth(\n  ${JSON.stringify(short(t1))},\n  { maxWidth: ${w1} }\n)`}
         />
@@ -362,7 +362,7 @@ export default function Playground() {
           <Slider label="Max lines" value={l2} onChange={setL2} min={1} max={10} />
           <Slider label="Line height" value={lh2} onChange={setLh2} min={16} max={48} suffix="px" />
         </div>
-        <Result>{r2}</Result>
+        <Result>{r2.text}</Result>
         <Code
           code={`truncateByLines(\n  ${JSON.stringify(short(t2))},\n  { maxWidth: ${w2}, lineHeight: ${lh2}, maxLines: ${l2} }\n)`}
         />
@@ -408,13 +408,13 @@ export default function Playground() {
             Normal
           </T>
           <T size="m" className="leading-body break-words mb-3">
-            {r4n}
+            {r4n.text}
           </T>
           <T role="dim" size="s" mono className="mb-1">
             Keep all
           </T>
           <T size="m" className="leading-body break-words">
-            {r4k}
+            {r4k.text}
           </T>
         </div>
         <Code
@@ -444,13 +444,13 @@ export default function Playground() {
             Normal
           </T>
           <T size="m" className="leading-body break-words mb-3">
-            {r4nCjk}
+            {r4nCjk.text}
           </T>
           <T role="dim" size="s" mono className="mb-1">
             Keep all
           </T>
           <T size="m" className="leading-body break-words">
-            {r4kCjk}
+            {r4kCjk.text}
           </T>
         </div>
         <Code
@@ -477,7 +477,7 @@ export default function Playground() {
           <Slider label="Letter spacing" value={s5} onChange={setS5} min={0} max={12} suffix="px" />
         </div>
         <Result>
-          <span style={{ letterSpacing: s5 + "px" }}>{r5}</span>
+          <span style={{ letterSpacing: s5 + "px" }}>{r5.text}</span>
         </Result>
         <Code
           code={`truncateByWidth(\n  ${JSON.stringify(short(t5))},\n  { maxWidth: ${w5}, letterSpacing: ${s5} }\n)`}
