@@ -19,10 +19,28 @@ const QUICK =
 const LONG =
   "Typography is the visual component of the written word. A text must be readable and legible. But more than that, it should convey the tone and voice of the message. The choice of typeface, the spacing between letters and lines, the measure of the column. All of these elements work together to create an experience for the reader. In digital interfaces, truncation becomes a necessary tool when this carefully crafted text exceeds its container. Good truncation preserves meaning while respecting layout constraints.";
 
+const LANGS: Record<string, string> = {
+  english: "The quick brown fox jumps over the lazy dog.",
+  spanish: "El veloz murciélago hindú comía feliz cardillo y kiwi.",
+  german: "Victor jagt zwölf Boxkämpfer quer über den großen Sylter Deich.",
+  russian: "Съешь ещё этих мягких французских булок, да выпей чаю.",
+  thai: "เป็นมนุษย์สุดประเสริฐเลิศคุณค่า กว่าบรรดาฝูงสัตว์เดรัจฉาน",
+  cjk: "天地玄黄宇宙洪荒日月盈昃辰宿列张寒来暑往秋收冬藏闰余成岁律吕调阳云腾致雨露结为霜金生丽水玉出昆冈剑号巨阙珠称夜光",
+};
+
+const LANG_NAMES = ["english", "spanish", "german", "russian", "thai", "cjk"] as const;
+
+const SELECTORS = [
+  { value: "body", label: "body" },
+  { value: "h1", label: "h1" },
+  { value: "code", label: "code" },
+];
+
 const SCENARIOS = [
   { id: "width", label: "Width" },
   { id: "lines", label: "Lines" },
   { id: "languages", label: "Languages" },
+  { id: "cjk", label: "CJK" },
   { id: "spacing", label: "Spacing" },
   { id: "factory", label: "Factory" },
 ];
@@ -31,8 +49,6 @@ const RANGE_CLS =
   "w-40 h-px appearance-none bg-base/35 outline-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-base [&::-webkit-slider-thumb]:cursor-pointer";
 const BTN_CLS =
   "font-mono text-s px-3 py-1.5 ring-1 ring-base/15 text-base no-underline cursor-pointer hover:bg-base hover:text-surface transition-colors";
-const RADIO_CLS =
-  "appearance-none w-3 h-3 rounded-full ring-1 ring-base mr-1.5 cursor-pointer checked:bg-base";
 
 type Role = "primary" | "secondary" | "dim";
 type Sz = "s" | "m" | "l";
@@ -75,11 +91,13 @@ function Section({
   id,
   title,
   desc,
+  actions,
   children,
 }: {
   id: string;
   title: string;
   desc: string;
+  actions?: ReactNode;
   children: ReactNode;
 }) {
   return (
@@ -94,8 +112,21 @@ function Section({
       <T role="secondary" size="m" as="p" className="leading-body mb-6">
         {desc}
       </T>
+      {actions && <div className="flex flex-wrap items-start gap-x-6 gap-y-3 mb-4">{actions}</div>}
       {children}
     </section>
+  );
+}
+
+function Divider() {
+  return (
+    <div className="flex items-center gap-4 mb-24 select-none" aria-hidden>
+      <hr className="flex-1 ring-0 ring-t-base/15 ring-t-1" />
+      <T size="m" className="text-base/85 tracking-[0.2em] select-none">
+        ...
+      </T>
+      <hr className="flex-1 ring-0 ring-t-base/15 ring-t-1" />
+    </div>
   );
 }
 
@@ -140,6 +171,68 @@ function Slider({
   );
 }
 
+function RadioGroup({
+  name,
+  value,
+  onChange,
+  options,
+}: {
+  name: string;
+  value: string;
+  onChange: (v: string) => void;
+  options: readonly string[];
+}) {
+  return (
+    <div className="flex flex-wrap gap-x-6 gap-y-1" role="radiogroup" aria-label={name}>
+      {options.map((opt) => (
+        <label
+          key={opt}
+          className="flex items-center font-mono text-s text-dim cursor-pointer capitalize"
+        >
+          <input
+            type="radio"
+            name={name}
+            value={opt}
+            checked={value === opt}
+            onChange={() => onChange(opt)}
+            className="appearance-none w-3 h-3 rounded-full ring-1 ring-base mr-1.5 cursor-pointer checked:bg-base"
+          />
+          {opt}
+        </label>
+      ))}
+    </div>
+  );
+}
+
+function ToggleGroup({
+  value,
+  onChange,
+  options,
+}: {
+  value: Set<string>;
+  onChange: (v: string) => void;
+  options: { value: string; label?: string }[];
+}) {
+  return (
+    <div className="flex flex-wrap items-center gap-3">
+      {options.map((opt) => (
+        <label
+          key={opt.value}
+          className="flex items-center font-mono text-s text-dim cursor-pointer"
+        >
+          <input
+            type="checkbox"
+            checked={value.has(opt.value)}
+            onChange={() => onChange(opt.value)}
+            className="appearance-none w-3 h-3 ring-1 ring-base mr-1.5 cursor-pointer checked:bg-base"
+          />
+          {opt.label ?? opt.value}
+        </label>
+      ))}
+    </div>
+  );
+}
+
 function Result({ children }: { children: ReactNode }) {
   return (
     <div className="p-4 mt-4 ring-1 ring-base/15 min-h-12">
@@ -176,46 +269,61 @@ function short(s: string, n = 40): string {
   return s.length > n ? s.slice(0, n) + "…" : s;
 }
 
+function Textarea({
+  value,
+  onChange,
+  rows = 2,
+  label = "Sample text",
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  rows?: number;
+  label?: string;
+}) {
+  return (
+    <textarea
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      rows={rows}
+      className="w-full text-m leading-body p-3 ring-1 ring-base/15 resize-y min-h-[8em] focus:outline-none focus:ring-2 text-base bg-surface"
+      aria-label={label}
+    />
+  );
+}
+
 export default function Playground() {
   const [t1, setT1] = useState(QUICK);
   const [w1, setW1] = useState(350);
-  const r1 = truncateByWidth(t1, { maxWidth: w1 });
 
   const [t2, setT2] = useState(LONG);
   const [w2, setW2] = useState(400);
   const [l2, setL2] = useState(3);
   const [lh2, setLh2] = useState(28);
-  const r2 = truncateByLines(t2, { maxWidth: w2, lineHeight: lh2, maxLines: l2 });
 
-  const [t4, setT4] = useState("The quick brown fox jumps over the lazy dog.");
+  const [langText, setLangText] = useState(LANGS.english);
   const [lang, setLang] = useState("english");
-  const langs: Record<string, string> = {
-    english: "The quick brown fox jumps over the lazy dog.",
-    spanish: "El veloz murciélago hindú comía feliz cardillo y kiwi.",
-    german: "Victor jagt zwölf Boxkämpfer quer über den großen Sylter Deich.",
-    russian: "Съешь ещё этих мягких французских булок, да выпей чаю.",
-    thai: "เป็นมนุษย์สุดประเสริฐเลิศคุณค่า กว่าบรรดาฝูงสัตว์เดรัจฉาน",
-    cjk: "天地玄黄宇宙洪荒日月盈昃辰宿列张寒来暑往秋收冬藏闰余成岁律吕调阳云腾致雨露结为霜金生丽水玉出昆冈剑号巨阙珠称夜光",
-  };
-  const r4n = truncateByWidth(t4, { maxWidth: 200 });
-  const r4k = truncateByWidth(t4, { maxWidth: 200, wordBreak: "keep-all" });
+  const [langWidth, setLangWidth] = useState(200);
 
-  const CJK_DEFAULT =
-    "天地玄黄宇宙洪荒日月盈昃辰宿列张寒来暑往秋收冬藏闰余成岁律吕调阳云腾致雨露结为霜金生丽水玉出昆冈剑号巨阙珠称夜光";
-  const [tCjk, setTCjk] = useState(CJK_DEFAULT);
-  const [w4, setW4] = useState(200);
-  const r4nCjk = truncateByWidth(tCjk, { maxWidth: w4 });
-  const r4kCjk = truncateByWidth(tCjk, { maxWidth: w4, wordBreak: "keep-all" });
+  const [cjkText, setCjkText] = useState(LANGS.cjk);
+  const [cjkWidth, setCjkWidth] = useState(200);
 
   const [t5, setT5] = useState(QUICK);
   const [w5, setW5] = useState(350);
   const [s5, setS5] = useState(3);
-  const r5 = truncateByWidth(t5, { maxWidth: w5, letterSpacing: s5 });
 
   const [w6, setW6] = useState(400);
   const [l6, setL6] = useState(2);
   const [activeSels, setActiveSels] = useState(new Set(["body"]));
-  const results = {
+
+  const r1 = truncateByWidth(t1, { maxWidth: w1 });
+  const r2 = truncateByLines(t2, { maxWidth: w2, lineHeight: lh2, maxLines: l2 });
+  const langNormal = truncateByWidth(langText, { maxWidth: langWidth });
+  const langKeepAll = truncateByWidth(langText, { maxWidth: langWidth, wordBreak: "keep-all" });
+  const cjkNormal = truncateByWidth(cjkText, { maxWidth: cjkWidth });
+  const cjkKeepAll = truncateByWidth(cjkText, { maxWidth: cjkWidth, wordBreak: "keep-all" });
+  const r5 = truncateByWidth(t5, { maxWidth: w5, letterSpacing: s5 });
+
+  const factoryResults = {
     body: activeSels.has("body")
       ? createTruncator({ selector: "body", lineHeight: 28 }).truncateByLines(LONG, {
           maxWidth: w6,
@@ -235,6 +343,7 @@ export default function Playground() {
         }).text
       : LONG,
   };
+
   const toggle = (s: string) => {
     const next = new Set(activeSels);
     if (next.has(s)) next.delete(s);
@@ -321,13 +430,7 @@ export default function Playground() {
         title="Width truncation"
         desc="Truncate text to fit a pixel width on a single line. Measures each prefix, appends an ellipsis on overflow."
       >
-        <textarea
-          value={t1}
-          onChange={(e) => setT1(e.target.value)}
-          rows={2}
-          className="w-full text-m leading-body p-3 ring-1 ring-base/15 resize-y min-h-[8em] focus:outline-none focus:ring-2 text-base bg-surface"
-          aria-label="Sample text"
-        />
+        <Textarea value={t1} onChange={setT1} />
         <div className="flex flex-wrap gap-4 mt-4">
           <Slider label="Max width" value={w1} onChange={setW1} min={50} max={600} suffix="px" />
         </div>
@@ -337,18 +440,14 @@ export default function Playground() {
         />
       </Section>
 
+      <Divider />
+
       <Section
         id="lines"
         title="Multi-line truncation"
         desc="Truncate text within N lines. Full lines above, truncated last line below."
       >
-        <textarea
-          value={t2}
-          onChange={(e) => setT2(e.target.value)}
-          rows={3}
-          className="w-full text-m leading-body p-3 ring-1 ring-base/15 resize-y min-h-[8em] focus:outline-none focus:ring-2 text-base bg-surface"
-          aria-label="Sample text"
-        />
+        <Textarea value={t2} onChange={setT2} rows={3} />
         <div className="flex flex-wrap gap-4 mt-4">
           <Slider label="Max width" value={w2} onChange={setW2} min={200} max={700} suffix="px" />
           <Slider label="Max lines" value={l2} onChange={setL2} min={1} max={10} />
@@ -371,104 +470,99 @@ export default function Playground() {
         />
       </Section>
 
+      <Divider />
+
       <Section
         id="languages"
         title="Languages"
-        desc="Switch between scripts to see how wordBreak keep-all affects each language differently."
+        desc="Switch between scripts to see how wordBreak keep-all affects each language differently. Adjust the width to find each language's breakpoint."
+        actions={
+          <RadioGroup
+            name="lang"
+            value={lang}
+            onChange={(l) => {
+              setLang(l);
+              setLangText(LANGS[l]);
+            }}
+            options={LANG_NAMES}
+          />
+        }
       >
-        <div className="flex flex-wrap gap-x-6 gap-y-1 mt-3">
-          {["english", "spanish", "german", "russian", "thai", "cjk"].map((l) => (
-            <label
-              key={l}
-              className="flex items-center font-mono text-s text-dim cursor-pointer capitalize"
-            >
-              <input
-                type="radio"
-                name="lang"
-                value={l}
-                checked={lang === l}
-                onChange={() => {
-                  setLang(l);
-                  setT4(langs[l]);
-                }}
-                className={RADIO_CLS}
-              />
-              {l}
-            </label>
-          ))}
+        <Textarea value={langText} onChange={setLangText} />
+        <div className="flex flex-wrap gap-4 mt-4">
+          <Slider
+            label="Max width"
+            value={langWidth}
+            onChange={setLangWidth}
+            min={50}
+            max={500}
+            suffix="px"
+          />
         </div>
-        <textarea
-          value={t4}
-          onChange={(e) => setT4(e.target.value)}
-          rows={2}
-          className="w-full text-m leading-body p-3 ring-1 ring-base/15 resize-y min-h-[8em] focus:outline-none focus:ring-2 text-base bg-surface"
-          aria-label="Sample text"
-        />
         <div className="p-4 mt-4 ring-1 ring-base/15">
           <T role="dim" size="s" mono className="mb-1">
             Normal
           </T>
           <T size="m" className="leading-body break-words mb-3">
-            {r4n.text}
+            {langNormal.text}
           </T>
           <T role="dim" size="s" mono className="mb-1">
             Keep all
           </T>
           <T size="m" className="leading-body break-words">
-            {r4k.text}
+            {langKeepAll.text}
           </T>
         </div>
         <Code
-          code={`truncateByWidth(\n  ${JSON.stringify(short(t4))},\n  { maxWidth: 200 }\n)\n\n// keep-all\ntruncateByWidth(\n  ${JSON.stringify(short(t4))},\n  { maxWidth: 200, wordBreak: "keep-all" }\n)`}
+          code={`truncateByWidth(\n  ${JSON.stringify(short(langText))},\n  { maxWidth: ${langWidth} }\n)\n\n// keep-all\ntruncateByWidth(\n  ${JSON.stringify(short(langText))},\n  { maxWidth: ${langWidth}, wordBreak: "keep-all" }\n)`}
         />
       </Section>
+
+      <Divider />
 
       <Section
         id="cjk"
         title="CJK word break"
         desc="Pretext supports wordBreak keep-all, preventing breaks inside CJK and Hangul runs. Compare normal vs keep-all on the same text."
       >
-        <textarea
-          value={tCjk}
-          onChange={(e) => setTCjk(e.target.value)}
-          rows={2}
-          className="w-full text-m leading-body p-3 ring-1 ring-base/15 resize-y min-h-[8em] focus:outline-none focus:ring-2 text-base bg-surface"
-          aria-label="Sample text"
-        />
+        <Textarea value={cjkText} onChange={setCjkText} />
         <div className="flex flex-wrap gap-4 mt-4">
-          <Slider label="Max width" value={w4} onChange={setW4} min={50} max={500} suffix="px" />
+          <Slider
+            label="Max width"
+            value={cjkWidth}
+            onChange={setCjkWidth}
+            min={50}
+            max={500}
+            suffix="px"
+          />
         </div>
         <div className="p-4 mt-4 ring-1 ring-base/15">
           <T role="dim" size="s" mono className="mb-1">
             Normal
           </T>
           <T size="m" className="leading-body break-words mb-3">
-            {r4nCjk.text}
+            {cjkNormal.text}
           </T>
           <T role="dim" size="s" mono className="mb-1">
             Keep all
           </T>
           <T size="m" className="leading-body break-words">
-            {r4kCjk.text}
+            {cjkKeepAll.text}
           </T>
         </div>
         <Code
-          code={`// normal\ntruncateByWidth(\n  ${JSON.stringify(short(tCjk))},\n  { maxWidth: ${w4} }\n)\n\n// keep-all\ntruncateByWidth(\n  ${JSON.stringify(short(tCjk))},\n  { maxWidth: ${w4}, wordBreak: "keep-all" }\n)`}
+          code={`// normal\ntruncateByWidth(\n  ${JSON.stringify(short(cjkText))},\n  { maxWidth: ${cjkWidth} }\n)\n\n// keep-all\ntruncateByWidth(\n  ${JSON.stringify(short(cjkText))},\n  { maxWidth: ${cjkWidth}, wordBreak: "keep-all" }\n)`}
         />
       </Section>
+
+      <Divider />
 
       <Section
         id="spacing"
         title="Letter spacing"
         desc="Pass letterSpacing in CSS px to match your design. Wider spacing makes text take up more horizontal room, so truncation kicks in sooner."
       >
-        <textarea
-          value={t5}
-          onChange={(e) => setT5(e.target.value)}
-          rows={2}
-          className="w-full text-m leading-body p-3 ring-1 ring-base/15 resize-y min-h-[8em] focus:outline-none focus:ring-2 text-base bg-surface"
-          aria-label="Sample text"
-        />
+        <Textarea value={t5} onChange={setT5} />
         <div className="flex flex-wrap gap-4 mt-4">
           <Slider label="Max width" value={w5} onChange={setW5} min={50} max={600} suffix="px" />
           <Slider label="Letter spacing" value={s5} onChange={setS5} min={0} max={12} suffix="px" />
@@ -481,34 +575,17 @@ export default function Playground() {
         />
       </Section>
 
+      <Divider />
+
       <Section
         id="factory"
         title="Truncator factory"
         desc="Toggle truncation per selector. Each uses its registered font. ON = truncated, OFF = full text."
+        actions={<ToggleGroup value={activeSels} onChange={toggle} options={SELECTORS} />}
       >
         <div className="flex flex-wrap items-start gap-4 mt-4">
           <Slider label="Max width" value={w6} onChange={setW6} min={200} max={700} suffix="px" />
           <Slider label="Max lines" value={l6} onChange={setL6} min={1} max={8} />
-          <div className="flex flex-wrap items-center gap-3">
-            {[
-              { value: "body", label: "body", font: "18px Geist" },
-              { value: "h1", label: "h1", font: "26px Geist" },
-              { value: "code", label: "code", font: "13px Geist Mono" },
-            ].map((s) => (
-              <label
-                key={s.value}
-                className="flex items-center font-mono text-s text-dim cursor-pointer"
-              >
-                <input
-                  type="checkbox"
-                  checked={activeSels.has(s.value)}
-                  onChange={() => toggle(s.value)}
-                  className="appearance-none w-3 h-3 ring-1 ring-base mr-1.5 cursor-pointer checked:bg-base"
-                />
-                {s.label}
-              </label>
-            ))}
-          </div>
         </div>
         <div className="p-4 mt-4 ring-1 ring-base/15">
           {(["body", "h1", "code"] as const).map((s, i) => (
@@ -519,7 +596,7 @@ export default function Playground() {
                   {s}
                 </T>
                 <T size="m" className="leading-body break-words">
-                  {results[s]}
+                  {factoryResults[s]}
                 </T>
                 <T role="dim" size="s" mono className="shrink-0">
                   (
