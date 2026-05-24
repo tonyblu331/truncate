@@ -62,6 +62,7 @@ jobs:
           node-version: 22
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      - run: pnpm build
       - name: Build website
         run: pnpm --filter website run build
       - name: Deploy to GitHub Pages
