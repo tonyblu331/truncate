@@ -56,9 +56,9 @@ function Section({ id, title, desc, children }: { id: string; title: string; des
 
 function Divider() {
   return (
-    <div className="flex items-center gap-3 mb-24 select-none" aria-hidden>
+    <div className="flex items-center gap-4 mb-24 select-none" aria-hidden>
       <hr className="flex-1 ring-0 ring-t-base/15 ring-t-1" />
-      <T size="s" className="text-base select-none">...</T>
+      <T size="m" className="text-base/85 tracking-[0.2em] select-none">...</T>
       <hr className="flex-1 ring-0 ring-t-base/15 ring-t-1" />
     </div>
   )
@@ -139,7 +139,8 @@ export default function Playground() {
 
   const [w6, setW6] = useState(400)
   const [l6, setL6] = useState(2)
-  const Tfac = createTruncator({ selector: 'body', lineHeight: 28 })
+  const [sel, setSel] = useState('body')
+  const Tfac = createTruncator({ selector: sel, lineHeight: 28 })
   const r6 = Tfac.truncateByLines(LONG, { maxWidth: w6, maxLines: l6 })
 
   return (
@@ -179,7 +180,7 @@ export default function Playground() {
 
       <Section id="width" title="Width truncation" desc="Truncate text to fit a pixel width on a single line. Measures each prefix, appends an ellipsis on overflow.">
         <textarea value={t1} onChange={e => setT1(e.target.value)} rows={2}
-          className="w-full text-m leading-body p-3 ring-1 ring-base/15 resize-y min-h-[7em] focus:outline-none focus:ring-2 text-base bg-surface" aria-label="Sample text" />
+          className="w-full text-m leading-body p-3 ring-1 ring-base/15 resize-y min-h-[8em] focus:outline-none focus:ring-2 text-base bg-surface" aria-label="Sample text" />
         <div className="flex flex-wrap gap-4 mt-4">
           <Slider label="Max width" value={w1} onChange={setW1} min={50} max={600} suffix="px" />
         </div>
@@ -191,7 +192,7 @@ export default function Playground() {
 
       <Section id="lines" title="Multi-line truncation" desc="Truncate text within N lines. Full lines above, truncated last line below.">
         <textarea value={t2} onChange={e => setT2(e.target.value)} rows={3}
-          className="w-full text-m leading-body p-3 ring-1 ring-base/15 resize-y min-h-[7em] focus:outline-none focus:ring-2 text-base bg-surface" aria-label="Sample text" />
+          className="w-full text-m leading-body p-3 ring-1 ring-base/15 resize-y min-h-[8em] focus:outline-none focus:ring-2 text-base bg-surface" aria-label="Sample text" />
         <div className="flex flex-wrap gap-4 mt-4">
           <Slider label="Max width" value={w2} onChange={setW2} min={200} max={700} suffix="px" />
           <Slider label="Max lines" value={l2} onChange={setL2} min={1} max={10} />
@@ -205,7 +206,7 @@ export default function Playground() {
 
       <Section id="position" title="Position" desc="Choose where the ellipsis goes. Start, middle, or end. Mix truncation modes with a custom ellipsis character.">
         <textarea value={tp} onChange={e => setTp(e.target.value)} rows={2}
-          className="w-full text-m leading-body p-3 ring-1 ring-base/15 resize-y min-h-[7em] focus:outline-none focus:ring-2 text-base bg-surface" aria-label="Sample text" />
+          className="w-full text-m leading-body p-3 ring-1 ring-base/15 resize-y min-h-[8em] focus:outline-none focus:ring-2 text-base bg-surface" aria-label="Sample text" />
         <div className="flex flex-wrap gap-4 mt-4">
           <Slider label="Max width" value={wp} onChange={setWp} min={50} max={600} suffix="px" />
           <div className="flex flex-col gap-1">
@@ -243,7 +244,7 @@ export default function Playground() {
 
       <Section id="cjk" title="Cjk word break" desc="Pretext supports wordBreak keep-all, preventing breaks inside CJK and Hangul runs. Compare normal vs keep-all on the same text.">
         <textarea value={t4} onChange={e => setT4(e.target.value)} rows={2}
-          className="w-full text-m leading-body p-3 ring-1 ring-base/15 resize-y min-h-[7em] focus:outline-none focus:ring-2 text-base bg-surface" aria-label="Sample text" />
+          className="w-full text-m leading-body p-3 ring-1 ring-base/15 resize-y min-h-[8em] focus:outline-none focus:ring-2 text-base bg-surface" aria-label="Sample text" />
         <div className="flex flex-wrap gap-4 mt-4">
           <Slider label="Max width" value={w4} onChange={setW4} min={50} max={500} suffix="px" />
         </div>
@@ -260,7 +261,7 @@ export default function Playground() {
 
       <Section id="spacing" title="Letter spacing" desc="Pass letterSpacing in CSS px to match your design. Wider spacing makes text take up more horizontal room, so truncation kicks in sooner.">
         <textarea value={t5} onChange={e => setT5(e.target.value)} rows={2}
-          className="w-full text-m leading-body p-3 ring-1 ring-base/15 resize-y min-h-[7em] focus:outline-none focus:ring-2 text-base bg-surface" aria-label="Sample text" />
+          className="w-full text-m leading-body p-3 ring-1 ring-base/15 resize-y min-h-[8em] focus:outline-none focus:ring-2 text-base bg-surface" aria-label="Sample text" />
         <div className="flex flex-wrap gap-4 mt-4">
           <Slider label="Max width" value={w5} onChange={setW5} min={50} max={600} suffix="px" />
           <Slider label="Letter spacing" value={s5} onChange={setS5} min={0} max={12} suffix="px" />
@@ -273,13 +274,25 @@ export default function Playground() {
 
       <Divider />
 
-      <Section id="factory" title="Truncator factory" desc="Pre-configure defaults via createTruncator. All methods inherit the config. Registry-based selectors resolve fonts globally.">
+      <Section id="factory" title="Truncator factory" desc="Pre-configure defaults via createTruncator. Toggle between registered selectors to see how font configuration affects truncation.">
         <div className="flex flex-wrap gap-4 mt-4">
           <Slider label="Max width" value={w6} onChange={setW6} min={200} max={700} suffix="px" />
           <Slider label="Max lines" value={l6} onChange={setL6} min={1} max={8} />
         </div>
+        <div className="flex flex-wrap gap-x-6 gap-y-1 mt-3">
+          {[
+            { value: 'body', label: 'body', font: '18px Geist' },
+            { value: 'h1', label: 'h1', font: '26px Geist' },
+            { value: 'code', label: 'code', font: '13px Geist Mono' },
+          ].map(s => (
+            <label key={s.value} className="flex items-center font-mono text-s text-dim cursor-pointer">
+              <input type="radio" name="selector" value={s.value} checked={sel === s.value} onChange={() => setSel(s.value)} className={RADIO_CLS} />
+              {s.label} <T role="dim" size="s" mono as="span" className="ml-1">({s.font})</T>
+            </label>
+          ))}
+        </div>
         <Result>{r6}</Result>
-        <Code code={`const t = createTruncator({\n  selector: 'body',\n  lineHeight: 28,\n})\n\nt.truncateByLines(\n  ${JSON.stringify(short(LONG))},\n  { maxWidth: ${w6}, maxLines: ${l6} }\n)`} />
+        <Code code={`register('body', { font: '18px Geist' })\nregister('h1', { font: '26px Geist' })\nregister('code', { font: '13px Geist Mono' })\n\nconst t = createTruncator({\n  selector: '${sel}',\n  lineHeight: 28,\n})\n\nt.truncateByLines(\n  ${JSON.stringify(short(LONG))},\n  { maxWidth: ${w6}, maxLines: ${l6} }\n)`} />
       </Section>
     </div>
   )
