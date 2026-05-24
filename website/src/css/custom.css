@@ -13,7 +13,7 @@
   --font-body: 'Roboto Slab', Georgia, 'Times New Roman', serif;
   --font-mono: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
 
-  --measure: 42rem;
+  --measure: 64ch;
   --space: 1.5rem;
   --space-lg: 4rem;
 }
@@ -52,7 +52,6 @@ h3 { font-size: 1.25rem; }
 
 p {
   margin: 0 0 1em;
-  max-width: var(--measure);
 }
 
 a {
@@ -88,10 +87,6 @@ code {
 pre code {
   background: none;
   padding: 0;
-}
-
-.theme-doc-markdown {
-  max-width: var(--measure);
 }
 
 /* ── Layout ───────────────────────────────────── */
@@ -140,12 +135,6 @@ pre code {
   color: var(--gray-500);
 }
 
-.container {
-  max-width: var(--measure);
-  margin: 0 auto;
-  padding: 0;
-}
-
 /* ── Hero ──────────────────────────────────────── */
 
 .hero {
@@ -185,12 +174,6 @@ pre code {
 
 .install-bar code:hover {
   background: var(--gray-200);
-}
-
-.install-bar .separator {
-  color: var(--gray-300);
-  font-family: var(--font-body);
-  font-size: 0.75rem;
 }
 
 .install-bar .docs-link {
@@ -391,10 +374,6 @@ pre code {
 .main-wrapper h1:first-child { margin-top: 0; }
 .main-wrapper h2:first-child { margin-top: 0; }
 .main-wrapper h3:first-child { margin-top: 0; }
-
-.theme-doc-markdown {
-  max-width: var(--measure);
-}
 
 .pagination-nav {
   display: none;
