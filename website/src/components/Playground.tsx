@@ -92,12 +92,14 @@ function Result({ children, stats }: { children: ReactNode; stats?: string }) {
 function Code({ code }: { code: string }) {
   const [copied, setCopied] = useState(false)
   return (
-    <div className="relative mt-4 font-mono text-s leading-relaxed ring-1 ring-base/15">
-      <button type="button" onClick={async () => { await navigator.clipboard.writeText(code); setCopied(true); setTimeout(() => setCopied(false), 1500) }}
-        className="absolute top-2 right-2 font-mono text-s px-2 py-1 text-dim hover:text-base">
-        {copied ? 'copied' : 'copy'}
-      </button>
-      <pre className="p-4 overflow-x-auto"><code>{code}</code></pre>
+    <div className="relative mt-4">
+      <pre className="font-mono text-s leading-relaxed ring-1 ring-base/15 p-4 pt-8 overflow-x-auto">
+        <button type="button" onClick={async () => { await navigator.clipboard.writeText(code); setCopied(true); setTimeout(() => setCopied(false), 1500) }}
+          className="absolute -top-px right-0 font-mono text-s px-2 py-0.5 ring-1 ring-base/15 bg-surface text-dim hover:text-base">
+          {copied ? 'copied' : 'copy'}
+        </button>
+        <code>{code}</code>
+      </pre>
     </div>
   )
 }
@@ -179,7 +181,7 @@ export default function Playground() {
 
       <Section id="width" title="Width truncation" desc="Truncate text to fit a pixel width on a single line. Measures each prefix, appends an ellipsis on overflow.">
         <textarea value={t1} onChange={e => setT1(e.target.value)} rows={2}
-          className="w-full text-m leading-body p-3 ring-1 ring-base/15 resize-y [field-sizing:content] min-h-[4lh] focus:outline-none focus:ring-2 text-base bg-surface" aria-label="Sample text" />
+          className="w-full text-m leading-body p-3 ring-1 ring-base/15 resize-y min-h-[7em] focus:outline-none focus:ring-2 text-base bg-surface" aria-label="Sample text" />
         <div className="flex flex-wrap gap-4 mt-4">
           <Slider label="Max width" value={w1} onChange={setW1} min={50} max={600} suffix="px" />
         </div>
@@ -191,7 +193,7 @@ export default function Playground() {
 
       <Section id="lines" title="Multi-line truncation" desc="Truncate text within N lines. Full lines above, truncated last line below.">
         <textarea value={t2} onChange={e => setT2(e.target.value)} rows={3}
-          className="w-full text-m leading-body p-3 ring-1 ring-base/15 resize-y [field-sizing:content] min-h-[4lh] focus:outline-none focus:ring-2 text-base bg-surface" aria-label="Sample text" />
+          className="w-full text-m leading-body p-3 ring-1 ring-base/15 resize-y min-h-[7em] focus:outline-none focus:ring-2 text-base bg-surface" aria-label="Sample text" />
         <div className="flex flex-wrap gap-4 mt-4">
           <Slider label="Max width" value={w2} onChange={setW2} min={200} max={700} suffix="px" />
           <Slider label="Max lines" value={l2} onChange={setL2} min={1} max={10} />
@@ -205,7 +207,7 @@ export default function Playground() {
 
       <Section id="ellipsis" title="Custom ellipsis" desc="Replace the default ellipsis with any string. Useful for localization, show more links, or editorial style guides.">
         <textarea value={t3} onChange={e => setT3(e.target.value)} rows={2}
-          className="w-full text-m leading-body p-3 ring-1 ring-base/15 resize-y [field-sizing:content] min-h-[4lh] focus:outline-none focus:ring-2 text-base bg-surface" aria-label="Sample text" />
+          className="w-full text-m leading-body p-3 ring-1 ring-base/15 resize-y min-h-[7em] focus:outline-none focus:ring-2 text-base bg-surface" aria-label="Sample text" />
         <div className="flex flex-wrap gap-4 mt-4">
           <Slider label="Max width" value={w3} onChange={setW3} min={50} max={600} suffix="px" />
           <div className="flex flex-col gap-1">
@@ -228,7 +230,7 @@ export default function Playground() {
 
       <Section id="cjk" title="Cjk word break" desc="Pretext supports wordBreak keep-all, preventing breaks inside CJK and Hangul runs. Compare normal vs keep-all on the same text.">
         <textarea value={t4} onChange={e => setT4(e.target.value)} rows={2}
-          className="w-full text-m leading-body p-3 ring-1 ring-base/15 resize-y [field-sizing:content] min-h-[4lh] focus:outline-none focus:ring-2 text-base bg-surface" aria-label="Sample text" />
+          className="w-full text-m leading-body p-3 ring-1 ring-base/15 resize-y min-h-[7em] focus:outline-none focus:ring-2 text-base bg-surface" aria-label="Sample text" />
         <div className="flex flex-wrap gap-4 mt-4">
           <Slider label="Max width" value={w4} onChange={setW4} min={50} max={500} suffix="px" />
         </div>
@@ -245,7 +247,7 @@ export default function Playground() {
 
       <Section id="middle" title="Middle truncation" desc="Truncate text in the middle, keeping both start and end. Ideal for URLs, file paths, and account identifiers.">
         <textarea value={t5} onChange={e => setT5(e.target.value)} rows={2}
-          className="w-full text-m leading-body p-3 ring-1 ring-base/15 resize-y [field-sizing:content] min-h-[4lh] focus:outline-none focus:ring-2 text-base bg-surface" aria-label="Sample text" />
+          className="w-full text-m leading-body p-3 ring-1 ring-base/15 resize-y min-h-[7em] focus:outline-none focus:ring-2 text-base bg-surface" aria-label="Sample text" />
         <div className="flex flex-wrap gap-4 mt-4">
           <Slider label="Max width" value={w5} onChange={setW5} min={50} max={600} suffix="px" />
         </div>
@@ -257,7 +259,7 @@ export default function Playground() {
 
       <Section id="spacing" title="Letter spacing" desc="Pass letterSpacing in CSS px to match your design. Wider spacing makes text take up more horizontal room, so truncation kicks in sooner.">
         <textarea value={t6} onChange={e => setT6(e.target.value)} rows={2}
-          className="w-full text-m leading-body p-3 ring-1 ring-base/15 resize-y [field-sizing:content] min-h-[4lh] focus:outline-none focus:ring-2 text-base bg-surface" aria-label="Sample text" />
+          className="w-full text-m leading-body p-3 ring-1 ring-base/15 resize-y min-h-[7em] focus:outline-none focus:ring-2 text-base bg-surface" aria-label="Sample text" />
         <div className="flex flex-wrap gap-4 mt-4">
           <Slider label="Max width" value={w6} onChange={setW6} min={50} max={600} suffix="px" />
           <Slider label="Letter spacing" value={s6} onChange={setS6} min={0} max={12} suffix="px" />
