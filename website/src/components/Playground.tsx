@@ -214,7 +214,7 @@ function ToggleGroup({
   options: { value: string; label?: string }[];
 }) {
   return (
-    <div className="flex flex-wrap items-center gap-3">
+    <div className="flex flex-col items-start gap-1">
       {options.map((opt) => (
         <label
           key={opt.value}
@@ -591,12 +591,9 @@ export default function Playground() {
           {(["body", "h1", "code"] as const).map((s, i) => (
             <div key={s}>
               {i > 0 && <hr className="my-3 ring-0 ring-t-base/15 ring-t-1" />}
-              <div className="flex items-baseline gap-2">
+              <div className="flex items-baseline gap-2 mb-0.5">
                 <T role="dim" size="s" mono className="shrink-0">
                   {s}
-                </T>
-                <T size="m" className="leading-body break-words">
-                  {factoryResults[s]}
                 </T>
                 <T role="dim" size="s" mono className="shrink-0">
                   (
@@ -604,6 +601,16 @@ export default function Playground() {
                     ? `${s === "code" ? "13px Geist Mono" : s === "h1" ? "26px Geist" : "18px Geist"}`
                     : "full"}
                   )
+                </T>
+              </div>
+              <div
+                className="factory-row"
+                style={{
+                  maxHeight: activeSels.has(s) ? `${l6 * 31}px` : "4000px",
+                }}
+              >
+                <T size="m" className="leading-body break-words">
+                  {factoryResults[s]}
                 </T>
               </div>
             </div>
