@@ -2,15 +2,15 @@
   "name": "truncate",
   "version": "0.1.0",
   "description": "DOM-free text truncation powered by @chenglou/pretext",
+  "homepage": "https://github.com/tonyblu331/truncate#readme",
+  "bugs": {
+    "url": "https://github.com/tonyblu331/truncate/issues"
+  },
   "license": "MIT",
   "author": "Antonio Bonet K Antonio Bonet",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/tonyblu331/truncate.git"
-  },
-  "homepage": "https://github.com/tonyblu331/truncate#readme",
-  "bugs": {
-    "url": "https://github.com/tonyblu331/truncate/issues"
   },
   "files": [
     "dist"

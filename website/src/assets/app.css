@@ -1,8 +1,8 @@
 @import "tailwindcss";
 
 @theme {
-  --font-sans: 'Geist', system-ui, sans-serif;
-  --font-mono: 'Geist Mono', 'Fira Code', monospace;
+  --font-sans: "Geist", system-ui, sans-serif;
+  --font-mono: "Geist Mono", "Fira Code", monospace;
 
   --color-surface: oklch(0.985 0.003 270);
   --color-base: oklch(0.14 0.006 270);
@@ -16,7 +16,10 @@
   --leading-heading: 1.2;
 }
 
-html { font-size: 18px; scroll-behavior: smooth; }
+html {
+  font-size: 18px;
+  scroll-behavior: smooth;
+}
 
 body {
   font-family: var(--font-sans);
@@ -40,5 +43,7 @@ body {
 }
 
 @media (max-width: 600px) {
-  html { font-size: 16px; }
+  html {
+    font-size: 16px;
+  }
 }

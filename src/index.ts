@@ -1,1 +1,1 @@
-export * from './truncate.js'
+export * from "./truncate.js";

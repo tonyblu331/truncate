@@ -9,21 +9,21 @@ npm install @antonio-bonet/truncate
 ## Quick start
 
 ```ts
-import { truncate, createTruncator } from "truncate"
+import { truncate, createTruncator } from "truncate";
 
 // Auto-detect strategy based on options
-truncate("A very long string", { font: "16px Inter", maxWidth: 100 })
+truncate("A very long string", { font: "16px Inter", maxWidth: 100 });
 // → "A very lo…"  (width truncation)
 
-truncate(longArticle, { font: "16px Inter", maxWidth: 320, maxLines: 3 })
+truncate(longArticle, { font: "16px Inter", maxWidth: 320, maxLines: 3 });
 // → "First line\nSecond line\nThird li…"  (line truncation)
 
 // Factory for repeated use
-const t = createTruncator({ font: "16px Inter", lineHeight: 22 })
+const t = createTruncator({ font: "16px Inter", lineHeight: 22 });
 
-t.truncateByWidth("Hello", { maxWidth: 200 })
-t.truncateByLines(longArticle, { maxWidth: 320, maxLines: 3 })
-t.measureHeight("Hello\nworld", { maxWidth: 320 })
+t.truncateByWidth("Hello", { maxWidth: 200 });
+t.truncateByLines(longArticle, { maxWidth: 320, maxLines: 3 });
+t.measureHeight("Hello\nworld", { maxWidth: 320 });
 ```
 
 ## API
@@ -32,14 +32,14 @@ t.measureHeight("Hello\nworld", { maxWidth: 320 })
 
 Single entry point, auto-detects strategy:
 
-| If `options` has… | Strategy |
-|---|---|
-| `maxLines` | Multi-line truncation via `truncateByLines` |
-| no `maxLines` | Single-line width truncation via `truncateByWidth` |
+| If `options` has… | Strategy                                           |
+| ----------------- | -------------------------------------------------- |
+| `maxLines`        | Multi-line truncation via `truncateByLines`        |
+| no `maxLines`     | Single-line width truncation via `truncateByWidth` |
 
 ```ts
-truncate("Hello world", { font: "16px Inter", maxWidth: 100 })
-truncate("Hello world", { font: "16px Inter", maxWidth: 100, maxLines: 3, lineHeight: 22 })
+truncate("Hello world", { font: "16px Inter", maxWidth: 100 });
+truncate("Hello world", { font: "16px Inter", maxWidth: 100, maxLines: 3, lineHeight: 22 });
 ```
 
 ### `truncateByWidth(text, options)`
@@ -51,7 +51,7 @@ truncateByWidth("A very long string", {
   font: "16px Inter",
   maxWidth: 100,
   ellipsis: "…",
-})
+});
 ```
 
 ### `truncateByLines(text, options)`
@@ -64,7 +64,7 @@ truncateByLines(longArticle, {
   maxWidth: 320,
   lineHeight: 22,
   maxLines: 3,
-})
+});
 ```
 
 ### `measureHeight(text, options)`
@@ -76,7 +76,7 @@ measureHeight("Hello\nworld", {
   font: "16px Inter",
   maxWidth: 320,
   lineHeight: 22,
-})
+});
 // → 44
 ```
 
@@ -89,15 +89,15 @@ const t = createTruncator({
   font: "16px Inter",
   lineHeight: 22,
   ellipsis: "…",
-})
+});
 
 // Font is already set — pass only what varies
-t.truncateByWidth("Hello", { maxWidth: 200 })
-t.truncateByLines(longArticle, { maxWidth: 320, maxLines: 3 })
-t.measureHeight("Hello\nworld", { maxWidth: 320 })
+t.truncateByWidth("Hello", { maxWidth: 200 });
+t.truncateByLines(longArticle, { maxWidth: 320, maxLines: 3 });
+t.measureHeight("Hello\nworld", { maxWidth: 320 });
 
 // Per-call overrides win
-t.truncateByWidth("Bold text", { font: "bold 24px Inter", maxWidth: 200 })
+t.truncateByWidth("Bold text", { font: "bold 24px Inter", maxWidth: 200 });
 ```
 
 Returns an object with `truncate`, `truncateByWidth`, `truncateByLines`, and `measureHeight` — all with `font` pre-bound.
@@ -106,38 +106,38 @@ Returns an object with `truncate`, `truncateByWidth`, `truncateByLines`, and `me
 
 ### `TruncateOptions`
 
-| Option | Type | Default | Required | Used by |
-|---|---|---|---|---|
-| `font` | `string` | — | ✅ | All |
-| `maxWidth` | `number` | — | ✅ | All |
-| `lineHeight` | `number` | `20` | only for lines | `truncateByLines` |
-| `maxLines` | `number` | — | only for lines | `truncateByLines` |
-| `ellipsis` | `string` | `"…"` | ❌ | truncation |
-| `wordBreak` | `'normal' \| 'keep-all'` | `'normal'` | ❌ | All |
-| `letterSpacing` | `number` | — | ❌ | All |
-| `whiteSpace` | `'normal' \| 'pre-wrap'` | `'normal'` | ❌ | All |
+| Option          | Type                     | Default    | Required       | Used by           |
+| --------------- | ------------------------ | ---------- | -------------- | ----------------- |
+| `font`          | `string`                 | —          | ✅             | All               |
+| `maxWidth`      | `number`                 | —          | ✅             | All               |
+| `lineHeight`    | `number`                 | `20`       | only for lines | `truncateByLines` |
+| `maxLines`      | `number`                 | —          | only for lines | `truncateByLines` |
+| `ellipsis`      | `string`                 | `"…"`      | ❌             | truncation        |
+| `wordBreak`     | `'normal' \| 'keep-all'` | `'normal'` | ❌             | All               |
+| `letterSpacing` | `number`                 | —          | ❌             | All               |
+| `whiteSpace`    | `'normal' \| 'pre-wrap'` | `'normal'` | ❌             | All               |
 
 ### `MeasureOptions`
 
-| Option | Type | Default | Required |
-|---|---|---|---|
-| `font` | `string` | — | ✅ |
-| `maxWidth` | `number` | — | ✅ |
-| `lineHeight` | `number` | — | ✅ |
-| `wordBreak` | `'normal' \| 'keep-all'` | `'normal'` | ❌ |
-| `letterSpacing` | `number` | — | ❌ |
-| `whiteSpace` | `'normal' \| 'pre-wrap'` | `'normal'` | ❌ |
+| Option          | Type                     | Default    | Required |
+| --------------- | ------------------------ | ---------- | -------- |
+| `font`          | `string`                 | —          | ✅       |
+| `maxWidth`      | `number`                 | —          | ✅       |
+| `lineHeight`    | `number`                 | —          | ✅       |
+| `wordBreak`     | `'normal' \| 'keep-all'` | `'normal'` | ❌       |
+| `letterSpacing` | `number`                 | —          | ❌       |
+| `whiteSpace`    | `'normal' \| 'pre-wrap'` | `'normal'` | ❌       |
 
 ### `TruncatorConfig`
 
-| Option | Type | Default | Description |
-|---|---|---|---|
-| `font` | `string` | — | Font pre-bound to all methods |
-| `lineHeight` | `number` | — | Default for `truncateByLines` / `measureHeight` |
-| `ellipsis` | `string` | `"…"` | Default ellipsis |
-| `wordBreak` | `'normal' \| 'keep-all'` | `'normal'` | Default word-break behaviour |
-| `letterSpacing` | `number` | — | Default letter spacing |
-| `whiteSpace` | `'normal' \| 'pre-wrap'` | `'normal'` | Default whitespace mode |
+| Option          | Type                     | Default    | Description                                     |
+| --------------- | ------------------------ | ---------- | ----------------------------------------------- |
+| `font`          | `string`                 | —          | Font pre-bound to all methods                   |
+| `lineHeight`    | `number`                 | —          | Default for `truncateByLines` / `measureHeight` |
+| `ellipsis`      | `string`                 | `"…"`      | Default ellipsis                                |
+| `wordBreak`     | `'normal' \| 'keep-all'` | `'normal'` | Default word-break behaviour                    |
+| `letterSpacing` | `number`                 | —          | Default letter spacing                          |
+| `whiteSpace`    | `'normal' \| 'pre-wrap'` | `'normal'` | Default whitespace mode                         |
 
 ## Passthrough options
 
@@ -152,7 +152,7 @@ Returns an object with `truncate`, `truncateByWidth`, `truncateByLines`, and `me
 Fully typed. All options interfaces are exported:
 
 ```ts
-import type { TruncateOptions, MeasureOptions, TruncatorConfig, Truncator } from "truncate"
+import type { TruncateOptions, MeasureOptions, TruncatorConfig, Truncator } from "truncate";
 ```
 
 ## Why?
