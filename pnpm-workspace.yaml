@@ -1,2 +1,6 @@
+packages:
+  - 'website'
 allowBuilds:
   canvas: true
+  esbuild: true
+  sharp: true

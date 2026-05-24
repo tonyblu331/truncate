@@ -1,0 +1,47 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: 'Geist', system-ui, sans-serif;
+  --font-mono: 'Geist Mono', 'Fira Code', monospace;
+
+  --color-surface: oklch(0.985 0.003 270);
+  --color-muted: oklch(0.93 0.004 270);
+  --color-base: oklch(0.14 0.006 270);
+  --color-border: oklch(0.14 0.006 270 / 0.12);
+
+  --text-s: 0.722rem;
+  --text-m: 1rem;
+  --text-l: 1.444rem;
+
+  --leading-body: 1.7;
+  --leading-heading: 1.2;
+
+  --radius-grid: 0;
+}
+
+html { font-size: 18px; }
+
+body {
+  font-family: var(--font-sans);
+  font-weight: 400;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+.content-grid {
+  display: grid;
+  grid-template-columns: 1fr minmax(auto, 24ch) 1fr;
+}
+
+.content-grid > * {
+  grid-column: 2;
+}
+
+.content-grid > .full {
+  grid-column: 1 / -1;
+}
+
+@media (max-width: 600px) {
+  html { font-size: 16px; }
+}
