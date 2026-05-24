@@ -4,7 +4,8 @@ export type WordBreakMode = 'normal' | 'keep-all'
 export type WhiteSpaceMode = 'normal' | 'pre-wrap'
 
 export interface TruncateOptions {
-  font: string
+  font?: string
+  selector?: string
   maxWidth: number
   ellipsis?: string
   lineHeight?: number
@@ -15,7 +16,8 @@ export interface TruncateOptions {
 }
 
 export interface MeasureOptions {
-  font: string
+  font?: string
+  selector?: string
   maxWidth: number
   lineHeight: number
   wordBreak?: WordBreakMode
@@ -24,7 +26,8 @@ export interface MeasureOptions {
 }
 
 export interface TruncatorConfig {
-  font: string
+  font?: string
+  selector?: string
   lineHeight?: number
   ellipsis?: string
   wordBreak?: WordBreakMode
@@ -41,6 +44,44 @@ export interface Truncator {
 }
 
 type PretextExtras = { wordBreak?: WordBreakMode; letterSpacing?: number; whiteSpace?: WhiteSpaceMode }
+
+// ── Font registry ──────────────────────────────────────────────
+
+let autoFont: string | null = null
+const fiber = new Map<string, string>()
+
+function detect(): string {
+  if (autoFont) return autoFont
+  if (typeof document === 'undefined' || !document.body) {
+    throw new Error('truncate: specify `font` option or call `detectFont()` in the browser')
+  }
+  const style = getComputedStyle(document.body)
+  const px = parseFloat(style.fontSize) || 16
+  const commaIdx = style.fontFamily.indexOf(',')
+  const first = commaIdx > -1 ? style.fontFamily.slice(0, commaIdx).trim() : style.fontFamily.trim()
+  const quoted = first.startsWith("'") || first.startsWith('"') ? first : `'${first}'`
+  autoFont = `${px}px ${quoted}`
+  return autoFont
+}
+
+export function detectFont(): string {
+  return detect()
+}
+
+export function register(sel: string, config: { font: string }): void {
+  fiber.set(sel, config.font)
+}
+
+function resolveFont(opts: { font?: string; selector?: string }): string {
+  if (opts.font) return opts.font
+  if (opts.selector) {
+    const f = fiber.get(opts.selector)
+    if (f) return f
+  }
+  return detect()
+}
+
+// ── Internals ──────────────────────────────────────────────────
 
 function prep(text: string, font: string, extras?: PretextExtras) {
   return prepare(text, font, extras as Parameters<typeof prepare>[2])
@@ -81,11 +122,14 @@ function pickEllipsis(o: TruncateOptions): string {
   return o.ellipsis ?? '\u2026'
 }
 
+// ── Public API ─────────────────────────────────────────────────
+
 export function truncateByWidth(text: string, options: TruncateOptions): string {
   const ellipsis = pickEllipsis(options)
   if (!text) return ''
   const extras = extractExtras(options)
-  const { font, maxWidth } = options
+  const font = resolveFont(options)
+  const { maxWidth } = options
   if (maxWidth <= 0) return ''
 
   if (lineCount(text, font, maxWidth, extras) <= 1) return text
@@ -106,7 +150,8 @@ export function truncateByLines(text: string, options: TruncateOptions): string 
   const maxLines = options.maxLines ?? 1
   if (maxLines <= 0) return ''
   const extras = extractExtras(options)
-  const { font, maxWidth } = options
+  const font = resolveFont(options)
+  const { maxWidth } = options
   if (maxWidth <= 0) return ''
   const lh = options.lineHeight ?? 20
 
@@ -131,7 +176,8 @@ export function measureHeight(text: string, options: MeasureOptions): number {
   if (!text) return 0
   if (options.maxWidth <= 0) return 0
   const extras = extractExtras(options)
-  const p = prep(text, options.font, extras)
+  const font = resolveFont(options)
+  const p = prep(text, font, extras)
   const { height } = layout(p, options.maxWidth, options.lineHeight)
   return Math.max(height, options.lineHeight)
 }
@@ -140,7 +186,8 @@ export function truncateMiddle(text: string, options: TruncateOptions): string {
   const ellipsis = pickEllipsis(options)
   if (!text) return ''
   const extras = extractExtras(options)
-  const { font, maxWidth } = options
+  const font = resolveFont(options)
+  const { maxWidth } = options
   if (maxWidth <= 0) return ''
 
   if (lineCount(text, font, maxWidth, extras) <= 1) return text
@@ -173,28 +220,31 @@ export function truncate(text: string, options: TruncateOptions): string {
 }
 
 export function createTruncator(config: TruncatorConfig): Truncator {
+  const sel = config.selector
   const defaults: Partial<TruncateOptions> = {}
   if (config.lineHeight !== undefined) defaults.lineHeight = config.lineHeight
   if (config.ellipsis !== undefined) defaults.ellipsis = config.ellipsis
   if (config.wordBreak !== undefined) defaults.wordBreak = config.wordBreak
   if (config.letterSpacing !== undefined) defaults.letterSpacing = config.letterSpacing
   if (config.whiteSpace !== undefined) defaults.whiteSpace = config.whiteSpace
+  if (config.font !== undefined) defaults.font = config.font
+  if (sel !== undefined) defaults.selector = sel
 
   return {
     truncateByWidth(text, opts) {
-      return truncateByWidth(text, { font: config.font, ...defaults, ...opts } as TruncateOptions)
+      return truncateByWidth(text, { ...defaults, ...opts } as TruncateOptions)
     },
     truncateByLines(text, opts) {
-      return truncateByLines(text, { font: config.font, ...defaults, ...opts } as TruncateOptions)
+      return truncateByLines(text, { ...defaults, ...opts } as TruncateOptions)
     },
     measureHeight(text, opts) {
-      return measureHeight(text, { font: config.font, ...defaults, ...opts } as MeasureOptions)
+      return measureHeight(text, { ...defaults, ...opts } as MeasureOptions)
     },
     truncateMiddle(text, opts) {
-      return truncateMiddle(text, { font: config.font, ...defaults, ...opts } as TruncateOptions)
+      return truncateMiddle(text, { ...defaults, ...opts } as TruncateOptions)
     },
     truncate(text, opts) {
-      return truncate(text, { font: config.font, ...defaults, ...opts } as TruncateOptions)
+      return truncate(text, { ...defaults, ...opts } as TruncateOptions)
     },
   }
 }

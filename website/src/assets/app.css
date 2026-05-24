@@ -5,9 +5,8 @@
   --font-mono: 'Geist Mono', 'Fira Code', monospace;
 
   --color-surface: oklch(0.985 0.003 270);
-  --color-muted: oklch(0.93 0.004 270);
   --color-base: oklch(0.14 0.006 270);
-  --color-border: oklch(0.14 0.006 270 / 0.12);
+  --color-dim: oklch(0.14 0.006 270 / 0.45);
 
   --text-s: 0.722rem;
   --text-m: 1rem;
@@ -15,8 +14,6 @@
 
   --leading-body: 1.7;
   --leading-heading: 1.2;
-
-  --radius-grid: 0;
 }
 
 html { font-size: 18px; }
