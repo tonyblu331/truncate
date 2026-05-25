@@ -1,4 +1,4 @@
-import { layout, measureLineStats, prepare, prepareWithSegments } from "@chenglou/pretext";
+import { measureLineStats, prepare, prepareWithSegments } from "@chenglou/pretext";
 import type { MeasureOptions, TruncateOptions, WhiteSpaceMode, WordBreakMode } from "./types.js";
 
 export type PretextExtras = {
@@ -29,7 +29,7 @@ export function lineCount(
   maxWidth: number,
   extras?: PretextExtras,
 ): number {
-  return text ? layout(prep(text, font, extras), maxWidth, 1).lineCount : 0;
+  return text ? measureLineStats(prepSeg(text, font, extras), maxWidth).lineCount : 0;
 }
 
 export function fitsSingleLine(

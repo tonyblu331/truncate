@@ -5,6 +5,7 @@ export default defineConfig({
     "*": "vp check --fix",
   },
   pack: {
+    entry: ["src/index.ts", "src/width.ts", "src/lines.ts", "src/range.ts", "src/factory.ts"],
     dts: true,
     exports: true,
     format: ["esm"],

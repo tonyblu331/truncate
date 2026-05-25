@@ -13,6 +13,33 @@ if (!bundlePath) {
 const buf = readFileSync(bundlePath)
 const rawKb = (buf.length / 1024).toFixed(1)
 const gzipKb = (gzipSync(buf).length / 1024).toFixed(1)
+const siteUrl = 'https://tonyblu331.github.io/truncate/'
+const repoUrl = 'https://github.com/tonyblu331/truncate'
+const npmUrl = 'https://www.npmjs.com/package/@tonybonet/truncate'
+const title = 'truncate: DOM-free text truncation for JavaScript'
+const description =
+  'A grapheme-safe JavaScript text truncation library for width, line count, middle ellipsis, search targets, and explicit ranges without DOM layout reads.'
+const bannerUrl = 'https://raw.githubusercontent.com/tonyblu331/truncate/master/assets/truncate-banner.svg'
+const structuredData = {
+  '@context': 'https://schema.org',
+  '@type': 'SoftwareSourceCode',
+  name: 'truncate',
+  codeRepository: repoUrl,
+  programmingLanguage: ['TypeScript', 'JavaScript'],
+  license: `${repoUrl}/blob/master/LICENSE`,
+  runtimePlatform: 'Web browsers, Node.js, and JavaScript runtimes with Canvas2D measurement',
+  description,
+  url: siteUrl,
+  sameAs: [npmUrl, repoUrl],
+  keywords: [
+    'text truncation',
+    'JavaScript truncation',
+    'TypeScript truncation',
+    'middle ellipsis',
+    'grapheme safe truncation',
+    'search snippet truncation',
+  ],
+}
 ---
 
 <!doctype html>
@@ -20,8 +47,21 @@ const gzipKb = (gzipSync(buf).length / 1024).toFixed(1)
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>truncate &middot; dom-free text truncation</title>
-    <meta name="description" content="Measure and truncate text by pixel width or line count. No browser layout, no flickering, no guesswork." />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href={siteUrl} />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="truncate" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={siteUrl} />
+    <meta property="og:image" content={bannerUrl} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={bannerUrl} />
+    <script type="application/ld+json" set:html={JSON.stringify(structuredData)} />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400&family=Geist+Mono:wght@400&display=swap" rel="stylesheet" />

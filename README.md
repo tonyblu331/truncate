@@ -2,17 +2,29 @@
   <img src="https://raw.githubusercontent.com/tonyblu331/truncate/master/assets/truncate-banner.svg" alt="Truncate: match-aware text truncation" width="100%" />
 </p>
 
-# truncate
+# truncate: DOM-free text truncation for JavaScript
 
-[![npm version](https://img.shields.io/npm/v/@tonybonet/truncate?color=111318)](https://www.npmjs.com/package/@tonybonet/truncate)
-[![npm downloads](https://img.shields.io/npm/dm/@tonybonet/truncate?color=111318)](https://www.npmjs.com/package/@tonybonet/truncate)
+[![npm](https://img.shields.io/npm/v/@tonybonet/truncate?label=npm&color=111318)](https://www.npmjs.com/package/@tonybonet/truncate)
+[![downloads](https://img.shields.io/npm/dm/@tonybonet/truncate?label=downloads&color=111318)](https://www.npmjs.com/package/@tonybonet/truncate)
 [![bundle size](https://img.shields.io/bundlephobia/minzip/@tonybonet/truncate?color=111318)](https://bundlephobia.com/package/@tonybonet/truncate)
-[![CI](https://github.com/tonyblu331/truncate/actions/workflows/ci.yml/badge.svg)](https://github.com/tonyblu331/truncate/actions/workflows/ci.yml)
 [![license](https://img.shields.io/npm/l/@tonybonet/truncate?color=111318)](LICENSE)
 
-DOM-free, grapheme-safe text truncation powered by [`@chenglou/pretext`](https://github.com/chenglou/pretext). Fit copy by pixel width, line count, target string, explicit range, or measured height without layout reads.
+DOM-free, grapheme-safe text truncation for JavaScript and TypeScript, powered by [`@chenglou/pretext`](https://github.com/chenglou/pretext). Fit copy by pixel width, line count, target string, explicit range, or measured height without layout reads.
 
 Use it when CSS ellipsis is too blunt: search snippets, support queues, command palettes, log rows, table cells, filenames, URLs, and previews where the important text can be buried in the middle.
+
+## What It Solves
+
+`@tonybonet/truncate` is a small text truncation utility for UI code that needs predictable measured output without reading browser layout. It helps with:
+
+- Pixel-width truncation for labels, table cells, and compact controls
+- Multi-line truncation for summaries and previews
+- Middle and start truncation for emails, filenames, hashes, and URLs
+- Match-aware truncation that keeps a search hit, ID, or error code visible
+- Range-aware truncation when a search/indexing layer already provides offsets
+- Grapheme-safe truncation for emoji, accents, and joined characters
+
+It is not a CSS replacement. Use CSS `text-overflow: ellipsis` when simple visual clipping is enough; use this library when the truncated string itself needs to be computed, tested, copied, indexed, or rendered outside normal DOM layout.
 
 ## Install
 
@@ -34,6 +46,19 @@ yarn add @tonybonet/truncate
 
 Runtime measurement uses Canvas2D: browser canvas, `OffscreenCanvas`, or a Node canvas polyfill.
 
+## Tree-shake-Friendly Imports
+
+The root entry exports the full API. For tighter application bundles, import the smaller subpath that matches the job:
+
+```ts
+import { truncateByWidth } from "@tonybonet/truncate/width";
+import { truncateByLines, measureHeight } from "@tonybonet/truncate/lines";
+import { truncateAround, truncateRange } from "@tonybonet/truncate/range";
+import { createTruncator } from "@tonybonet/truncate/factory";
+```
+
+These subpaths keep the public API split by behavior while preserving the normal root import for convenience.
+
 ## Why It Exists
 
 CSS ellipsis is fine when you only need `overflow: hidden`. Product UI usually needs more:
@@ -46,6 +71,20 @@ CSS ellipsis is fine when you only need `overflow: hidden`. Product UI usually n
 - Avoid slicing emoji, accents, and joined grapheme clusters in half
 
 This library gives you those behaviors as plain functions. No DOM measurement loop, no layout flicker, no splitting emoji or joined graphemes in half.
+
+## Common Questions
+
+### Can it truncate around a word in the middle of a paragraph?
+
+Yes. Use `truncateAround` with a `target` string. The result reports `metrics.rangePreserved` so callers can tell whether the target fit whole.
+
+### Can it preserve a range from search offsets?
+
+Yes. Use `truncateRange` with `start` and `end` grapheme offsets. This avoids re-matching text when your search layer already knows where the relevant span is.
+
+### Does it need the DOM?
+
+No DOM layout reads are required. Measurement uses Canvas2D through browser canvas, `OffscreenCanvas`, or a Node canvas polyfill.
 
 ## Quick Start
 
