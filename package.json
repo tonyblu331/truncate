@@ -1,6 +1,6 @@
 {
   "name": "@tonybonet/truncate",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "DOM-free, grapheme-safe text truncation for JavaScript and TypeScript.",
   "keywords": [
     "canvas",
