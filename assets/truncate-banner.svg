@@ -1,38 +1,49 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1280" height="640" viewBox="0 0 1280 640" role="img" aria-labelledby="title desc">
-  <title id="title">Truncate banner</title>
-  <desc id="desc">A clean typographic banner showing match-aware text truncation preserving invoice #1042.</desc>
-  <rect width="1280" height="640" fill="#fafafd"/>
-  <g stroke="#111318" stroke-opacity=".09" stroke-width="1">
+  <title id="title">truncate banner</title>
+  <desc id="desc">A typographic before and after banner showing regular ellipsis losing a support ticket ID while truncateAround preserves invoice #1042.</desc>
+  <rect width="1280" height="640" fill="#fbfbfd"/>
+  <g stroke="#111318" stroke-opacity=".07" stroke-width="1">
     <path d="M0 96h1280M0 176h1280M0 256h1280M0 336h1280M0 416h1280M0 496h1280"/>
     <path d="M96 0v640M176 0v640M256 0v640M336 0v640M416 0v640M496 0v640M576 0v640M656 0v640M736 0v640M816 0v640M896 0v640M976 0v640M1056 0v640M1136 0v640"/>
   </g>
-  <g fill="#111318" font-family="Geist Mono, SFMono-Regular, Consolas, monospace">
-    <text x="96" y="118" font-size="22" letter-spacing="2">DOM-FREE TEXT FITTING ENGINE</text>
-    <text x="96" y="208" font-family="Geist, Inter, system-ui, sans-serif" font-size="78" letter-spacing="0">Truncate</text>
-    <text x="100" y="284" font-size="24">plain width truncation</text>
-    <text x="100" y="438" font-size="24">match-aware truncation</text>
+
+  <g fill="#111318">
+    <text x="96" y="112" font-family="Geist Mono, SFMono-Regular, Consolas, monospace" font-size="20" letter-spacing="2">DOM-FREE TEXT TRUNCATION</text>
+    <text x="96" y="202" font-family="Geist, Inter, system-ui, sans-serif" font-size="76">Keep the useful part visible</text>
+    <text x="100" y="250" font-family="Geist, Inter, system-ui, sans-serif" font-size="24" fill-opacity=".66">Width, lines, middle ellipsis, targets, and explicit ranges.</text>
   </g>
-  <g font-family="Geist, Inter, system-ui, sans-serif" font-size="32">
-    <rect x="96" y="312" width="620" height="72" fill="#fafafd" stroke="#111318" stroke-opacity=".2"/>
-    <text x="122" y="358" fill="#111318">A long customer-support note can ...</text>
-    <text x="982" y="360" fill="#111318" font-family="Geist Mono, SFMono-Regular, Consolas, monospace" font-size="22">match lost</text>
-    <rect x="96" y="466" width="620" height="72" fill="#fafafd" stroke="#111318" stroke-opacity=".2"/>
-    <text x="122" y="512" fill="#111318">... about </text>
-    <rect x="272" y="482" width="220" height="42" fill="#111318"/>
-    <text x="286" y="512" fill="#fafafd">invoice #1042</text>
-    <text x="504" y="512" fill="#111318">, and t...</text>
-    <text x="942" y="514" fill="#111318" font-family="Geist Mono, SFMono-Regular, Consolas, monospace" font-size="22">invoice visible</text>
+
+  <g font-family="Geist Mono, SFMono-Regular, Consolas, monospace">
+    <rect x="96" y="304" width="1088" height="96" fill="#fff" stroke="#111318" stroke-opacity=".18"/>
+    <text x="122" y="340" fill="#111318" fill-opacity=".52" font-size="18">CSS / plain width truncation</text>
+    <text x="122" y="374" fill="#111318" font-size="27">Customer says the payment failed after opening...</text>
+    <g transform="translate(1014 330)">
+      <rect width="138" height="38" rx="0" fill="#f1f1f4" stroke="#111318" stroke-opacity=".18"/>
+      <text x="16" y="25" fill="#111318" fill-opacity=".58" font-size="16">target lost</text>
+    </g>
+
+    <rect x="96" y="432" width="1088" height="112" fill="#fff" stroke="#111318" stroke-opacity=".24"/>
+    <text x="122" y="469" fill="#111318" fill-opacity=".52" font-size="18">truncateAround(note, { target: "invoice #1042" })</text>
+    <text x="122" y="510" fill="#111318" font-size="27">...payment failed near </text>
+    <rect x="504" y="481" width="232" height="44" fill="#111318"/>
+    <text x="522" y="510" fill="#fbfbfd" font-size="27">invoice #1042</text>
+    <text x="752" y="510" fill="#111318" font-size="27"> after retry...</text>
+    <g transform="translate(970 477)">
+      <rect width="182" height="38" rx="0" fill="#111318"/>
+      <text x="16" y="25" fill="#fbfbfd" font-size="16">target preserved</text>
+    </g>
   </g>
-  <g fill="none" stroke="#111318">
-    <path d="M96 254h920" stroke-opacity=".55"/>
-    <circle cx="530" cy="254" r="10" fill="#111318"/>
-    <path d="M96 246v16M300 246v16M530 246v16M760 246v16M1016 246v16" stroke-opacity=".35"/>
+
+  <g fill="none" stroke="#111318" stroke-linecap="square">
+    <path d="M96 586h1088" stroke-opacity=".42"/>
+    <path d="M96 574v24M314 574v24M532 574v24M750 574v24M968 574v24M1184 574v24" stroke-opacity=".25"/>
+    <path d="M504 552v46" stroke-width="2"/>
+    <path d="M736 552v46" stroke-width="2"/>
   </g>
-  <g fill="#111318" fill-opacity=".54" font-family="Geist Mono, SFMono-Regular, Consolas, monospace" font-size="18">
-    <text x="96" y="238">150</text>
-    <text x="288" y="238">240</text>
-    <text x="512" y="238">300px</text>
-    <text x="744" y="238">420</text>
-    <text x="994" y="238">520</text>
+  <g fill="#111318" fill-opacity=".54" font-family="Geist Mono, SFMono-Regular, Consolas, monospace" font-size="16">
+    <text x="96" y="620">start</text>
+    <text x="485" y="620">target start</text>
+    <text x="714" y="620">target end</text>
+    <text x="1128" y="620">end</text>
   </g>
 </svg>

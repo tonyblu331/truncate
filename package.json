@@ -1,15 +1,20 @@
 {
   "name": "@tonybonet/truncate",
-  "version": "0.3.0",
-  "description": "DOM-free text truncation powered by @chenglou/pretext",
+  "version": "0.4.0",
+  "description": "DOM-free, grapheme-safe text truncation for JavaScript and TypeScript.",
   "keywords": [
     "canvas",
     "ellipsis",
     "grapheme",
+    "javascript",
+    "middle-ellipsis",
     "pretext",
-    "react",
+    "search-snippets",
+    "string-truncation",
     "text",
+    "text-truncation",
     "truncate",
+    "typescript",
     "typography",
     "ui"
   ],
@@ -31,7 +36,26 @@
   "sideEffects": false,
   "types": "./dist/index.d.mts",
   "exports": {
-    ".": "./dist/index.mjs",
+    ".": {
+      "types": "./dist/index.d.mts",
+      "import": "./dist/index.mjs"
+    },
+    "./width": {
+      "types": "./dist/width.d.mts",
+      "import": "./dist/width.mjs"
+    },
+    "./lines": {
+      "types": "./dist/lines.d.mts",
+      "import": "./dist/lines.mjs"
+    },
+    "./range": {
+      "types": "./dist/range.d.mts",
+      "import": "./dist/range.mjs"
+    },
+    "./factory": {
+      "types": "./dist/factory.d.mts",
+      "import": "./dist/factory.mjs"
+    },
     "./package.json": "./package.json"
   },
   "publishConfig": {
