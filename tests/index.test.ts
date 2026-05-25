@@ -4,10 +4,20 @@ import {
   truncateByLines,
   truncateMiddle,
   truncateStart,
+  truncateAtOffset,
+  truncateAround,
   measureHeight,
   truncate,
   createTruncator,
 } from "../src/index.ts";
+
+const TEXT = [
+  "First line of the text",
+  "Second line with more content",
+  "Third line here",
+  "Fourth line that is somewhat longer content",
+  "Fifth line of the text",
+];
 
 const FONT = "16px sans-serif";
 const WIDE = 500;
@@ -85,6 +95,49 @@ test("truncateByLines: custom lineHeight", () => {
   expect(r.truncated).toBe(true);
 });
 
+// ── keepLines ─────────────────────────────────────────────────
+
+test("truncateByLines: keepLines selects specific lines", () => {
+  const multi = TEXT.join("\n");
+  const r = truncateByLines(multi, { font: FONT, maxWidth: 500, keepLines: [1, 3, 5] });
+  expect(r.text.split("\n")).toEqual([TEXT[0], TEXT[2], TEXT[4]]);
+  expect(r.truncated).toBe(false);
+  expect(r.metrics.originalLineCount).toBe(5);
+});
+
+test("truncateByLines: keepLines with overflow truncates each line", () => {
+  const multi = TEXT.join("\n");
+  const r = truncateByLines(multi, { font: FONT, maxWidth: 30, keepLines: [1, 3, 5] });
+  const lines = r.text.split("\n");
+  expect(lines.length).toBe(3);
+  lines.forEach((l) => expect(l.length).toBeLessThan(TEXT[0].length));
+  expect(r.truncated).toBe(true);
+});
+
+test("truncateByLines: keepLines empty array returns empty", () => {
+  const r = truncateByLines("hello\nworld", { font: FONT, maxWidth: 500, keepLines: [] });
+  expect(r.text).toBe("");
+  expect(r.truncated).toBe(true);
+});
+
+test("truncateByLines: keepLines out of range returns empty", () => {
+  const r = truncateByLines("hello\nworld", { font: FONT, maxWidth: 500, keepLines: [99] });
+  expect(r.text).toBe("");
+  expect(r.truncated).toBe(true);
+});
+
+test("truncateByLines: keepLines with maxWidth 0 returns empty", () => {
+  const r = truncateByLines("hello\nworld", { font: FONT, maxWidth: 0, keepLines: [1, 2] });
+  expect(r.text).toBe("");
+  expect(r.truncated).toBe(true);
+});
+
+test("truncateByLines: keepLines empty text", () => {
+  const r = truncateByLines("", { font: FONT, maxWidth: 500, keepLines: [1] });
+  expect(r.text).toBe("");
+  expect(r.truncated).toBe(false);
+});
+
 // ── measureHeight ─────────────────────────────────────────────
 
 test("measureHeight: empty string", () => {
@@ -120,6 +173,13 @@ test("truncate: auto lines (has maxLines)", () => {
 test("truncate: short text passes through", () => {
   const r = truncate("hi", { font: FONT, maxWidth: 200 });
   expect(r.text).toBe("hi");
+  expect(r.truncated).toBe(false);
+});
+
+test("truncate: auto detects keepLines", () => {
+  const multi = TEXT.join("\n");
+  const r = truncate(multi, { font: FONT, maxWidth: 500, keepLines: [1, 3, 5] });
+  expect(r.text.split("\n")).toEqual([TEXT[0], TEXT[2], TEXT[4]]);
   expect(r.truncated).toBe(false);
 });
 
@@ -343,6 +403,185 @@ test("truncateStart: custom ellipsis at start", () => {
   expect(r.truncated).toBe(true);
 });
 
+// ── truncateAtOffset ─────────────────────────────────────────
+
+test("truncateAtOffset: short text fits", () => {
+  const r = truncateAtOffset("hi", { font: FONT, maxWidth: WIDE });
+  expect(r.text).toBe("hi");
+  expect(r.truncated).toBe(false);
+});
+
+test("truncateAtOffset: empty string", () => {
+  const r = truncateAtOffset("", { font: FONT, maxWidth: WIDE });
+  expect(r.text).toBe("");
+  expect(r.truncated).toBe(false);
+});
+
+test("truncateAtOffset: maxWidth=0 returns empty", () => {
+  const r = truncateAtOffset("hello", { font: FONT, maxWidth: 0 });
+  expect(r.text).toBe("");
+  expect(r.truncated).toBe(true);
+});
+
+test("truncateAtOffset: offset=0 behaves like truncateStart", () => {
+  const r = truncateAtOffset(LONG, { font: FONT, maxWidth: NARROW, offset: 0 });
+  expect(r.text.startsWith("…")).toBe(true);
+  expect(r.truncated).toBe(true);
+});
+
+test("truncateAtOffset: offset large behaves like truncateByWidth", () => {
+  const r = truncateAtOffset(LONG, { font: FONT, maxWidth: NARROW, offset: 999 });
+  expect(r.text).toMatch(/…$/);
+  expect(r.truncated).toBe(true);
+});
+
+test("truncateAtOffset: offset=5 keeps ~5 prefix graphemes", () => {
+  const r = truncateAtOffset("user@example.com", { font: FONT, maxWidth: 80, offset: 5 });
+  expect(r.text.length).toBeLessThan("user@example.com".length);
+  expect(r.text.startsWith("user@")).toBe(true);
+  expect(r.truncated).toBe(true);
+});
+
+test("truncateAtOffset: custom ellipsis", () => {
+  const r = truncateAtOffset("hello world this is a test", {
+    font: FONT,
+    maxWidth: 80,
+    offset: 5,
+    ellipsis: "...",
+  });
+  expect(r.text).toMatch(/\.\.\./);
+  expect(r.truncated).toBe(true);
+});
+
+test("truncateAtOffset: negative offset wraps from end", () => {
+  const r = truncateAtOffset(LONG, { font: FONT, maxWidth: NARROW, offset: -5 });
+  expect(r.text.length).toBeLessThan(LONG.length);
+  expect(r.truncated).toBe(true);
+});
+
+// ── truncateAround ───────────────────────────────────────────
+
+test("truncateAround: short text fits", () => {
+  const r = truncateAround("hi", { font: FONT, maxWidth: WIDE, target: "hi" });
+  expect(r.text).toBe("hi");
+  expect(r.truncated).toBe(false);
+});
+
+test("truncateAround: empty string", () => {
+  const r = truncateAround("", { font: FONT, maxWidth: WIDE, target: "x" });
+  expect(r.text).toBe("");
+  expect(r.truncated).toBe(false);
+});
+
+test("truncateAround: no target falls back to truncateByWidth", () => {
+  const r = truncateAround(LONG, { font: FONT, maxWidth: NARROW });
+  expect(r.text).toMatch(/…$/);
+  expect(r.truncated).toBe(true);
+});
+
+test("truncateAround: target not found falls back to truncateByWidth", () => {
+  const r = truncateAround("hello world", { font: FONT, maxWidth: NARROW, target: "zzz" });
+  expect(r.text).toMatch(/…$/);
+  expect(r.truncated).toBe(true);
+});
+
+test("truncateAround: keeps target word visible", () => {
+  const text = "The quick brown fox jumps over the lazy dog";
+  const r = truncateAround(text, { font: FONT, maxWidth: 100, target: "fox" });
+  expect(r.text).toContain("fox");
+  expect(r.truncated).toBe(true);
+});
+
+test("truncateAround: keeps target char visible", () => {
+  const r = truncateAround("user@example.com", { font: FONT, maxWidth: 80, target: "@" });
+  expect(r.text).toContain("@");
+  expect(r.truncated).toBe(true);
+});
+
+test("truncateAround: keeps emoji target visible", () => {
+  const text = "Hello from Uruguay 🇺🇾 with love";
+  const r = truncateAround(text, { font: FONT, maxWidth: 100, target: "🇺🇾" });
+  expect(r.text).toContain("🇺🇾");
+  expect(r.truncated).toBe(true);
+});
+
+test("truncateAround: keeps multi-char target visible", () => {
+  const text = "The password is: s3cr3t! — do not share";
+  const r = truncateAround(text, { font: FONT, maxWidth: 120, target: "s3cr3t!" });
+  expect(r.text).toContain("s3cr3t!");
+  expect(r.truncated).toBe(true);
+});
+
+test("truncateAround: custom ellipsis", () => {
+  const text = "The quick brown fox jumps over the lazy dog";
+  const r = truncateAround(text, { font: FONT, maxWidth: 100, target: "fox", ellipsis: "..." });
+  expect(r.text).toContain("fox");
+  expect(r.text).toMatch(/\.\.\./);
+  expect(r.truncated).toBe(true);
+});
+
+test("truncateAround: maxWidth=0 returns empty", () => {
+  const r = truncateAround("hello", { font: FONT, maxWidth: 0, target: "x" });
+  expect(r.text).toBe("");
+  expect(r.truncated).toBe(true);
+});
+
+test("truncateAround: context:0 shows only target", () => {
+  const text = "The quick brown fox jumps over the lazy dog";
+  const r = truncateAround(text, { font: FONT, maxWidth: 100, target: "fox", context: 0 });
+  expect(r.text).toContain("fox");
+  expect(r.text).not.toContain("brown");
+  expect(r.text).not.toContain("jumps");
+});
+
+test("truncateAround: context:3 shows 3 graphemes each side", () => {
+  const text = "The quick brown fox jumps over the lazy dog";
+  const r = truncateAround(text, { font: FONT, maxWidth: 140, target: "fox", context: 3 });
+  expect(r.text).toContain("fox");
+  expect(r.text).toContain("wn "); // 3 graphemes before "fox"
+});
+
+test("truncateAround: before:0, after:10 shows nothing before target", () => {
+  const text = "The quick brown fox jumps over the lazy dog";
+  const r = truncateAround(text, {
+    font: FONT,
+    maxWidth: 140,
+    target: "fox",
+    before: 0,
+    after: 10,
+  });
+  expect(r.text).toMatch(/^…/);
+  expect(r.text).toContain("fox");
+});
+
+test("truncateAround: before:10, after:0 shows nothing after target", () => {
+  const text = "The quick brown fox jumps over the lazy dog";
+  const r = truncateAround(text, {
+    font: FONT,
+    maxWidth: 140,
+    target: "fox",
+    before: 10,
+    after: 0,
+  });
+  expect(r.text).toMatch(/…$/);
+  expect(r.text).toContain("fox");
+});
+
+test("truncateAround: context+maxWidth limits shown text", () => {
+  const text = "The quick brown fox jumps over the lazy dog";
+  const big = truncateAround(text, { font: FONT, maxWidth: 200, target: "fox", context: 20 });
+  const small = truncateAround(text, { font: FONT, maxWidth: 100, target: "fox", context: 20 });
+  expect(small.text.length).toBeLessThanOrEqual(big.text.length);
+  expect(small.text).toContain("fox");
+});
+
+test("truncateAround: context with large width limit still shows target", () => {
+  const text = "The quick brown fox jumps over the lazy dog";
+  const r = truncateAround(text, { font: FONT, maxWidth: NARROW, target: "fox", context: 100 });
+  expect(r.text).toContain("fox");
+  expect(r.truncated).toBe(true);
+});
+
 // ── maxWidth as CSS unit strings ─────────────────────────────
 
 test("maxWidth: px string behaves like number", () => {
@@ -468,6 +707,8 @@ test("truncated flag: maxWidth=0 returns truncated true", () => {
   expect(truncateByLines("hello", { font: FONT, maxWidth: 0 }).truncated).toBe(true);
   expect(truncateMiddle("hello", { font: FONT, maxWidth: 0 }).truncated).toBe(true);
   expect(truncateStart("hello", { font: FONT, maxWidth: 0 }).truncated).toBe(true);
+  expect(truncateAtOffset("hello", { font: FONT, maxWidth: 0 }).truncated).toBe(true);
+  expect(truncateAround("hello", { font: FONT, maxWidth: 0, target: "x" }).truncated).toBe(true);
 });
 
 test("truncated flag: empty text returns truncated false", () => {
@@ -475,6 +716,8 @@ test("truncated flag: empty text returns truncated false", () => {
   expect(truncateByLines("", { font: FONT, maxWidth: 200 }).truncated).toBe(false);
   expect(truncateMiddle("", { font: FONT, maxWidth: 200 }).truncated).toBe(false);
   expect(truncateStart("", { font: FONT, maxWidth: 200 }).truncated).toBe(false);
+  expect(truncateAtOffset("", { font: FONT, maxWidth: 200 }).truncated).toBe(false);
+  expect(truncateAround("", { font: FONT, maxWidth: 200, target: "x" }).truncated).toBe(false);
 });
 
 test("maxWidth: em unit works with measureHeight", () => {

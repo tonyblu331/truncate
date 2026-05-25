@@ -1,5 +1,8 @@
 # truncate
 
+![bundle size](https://img.shields.io/badge/14.5%20kB-3.6%20kB%20gzip-blue)
+![tree-shakeable](https://img.shields.io/badge/tree--shakeable-yes-success)
+
 **DOM-free** text truncation. Measure & truncate text by pixel width or line count without a browser — powered by [`@chenglou/pretext`](https://github.com/chenglou/pretext).
 
 ```bash

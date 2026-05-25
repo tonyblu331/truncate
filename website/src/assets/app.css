@@ -47,6 +47,28 @@ body {
   transition: max-height 0.35s ease;
 }
 
+.code-content {
+  display: inline-block;
+  animation: codeReveal 0.35s ease-out;
+}
+
+@keyframes codeReveal {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+}
+
+.tab-panel {
+  animation: tabFadeSlide 0.3s ease-out;
+}
+
+@keyframes tabFadeSlide {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+
 @media (max-width: 600px) {
   html {
     font-size: 16px;
