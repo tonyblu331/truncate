@@ -1,5 +1,5 @@
 {
-  "name": "truncate",
+  "name": "@tonybonet/truncate",
   "version": "0.1.0",
   "description": "DOM-free text truncation powered by @chenglou/pretext",
   "homepage": "https://github.com/tonyblu331/truncate#readme",
@@ -7,7 +7,7 @@
     "url": "https://github.com/tonyblu331/truncate/issues"
   },
   "license": "MIT",
-  "author": "Antonio Bonet K Antonio Bonet",
+  "author": "Antonio Bonet",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/tonyblu331/truncate.git"
@@ -22,7 +22,8 @@
     "./package.json": "./package.json"
   },
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
   },
   "scripts": {
     "build": "vp pack",

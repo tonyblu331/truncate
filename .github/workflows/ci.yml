@@ -31,6 +31,7 @@ jobs:
     permissions:
       contents: read
       packages: write
+      id-token: write
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -40,6 +41,10 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm build
+      - name: Publish to npm
+        run: |
+          pnpm config set //registry.npmjs.org/:_authToken ${{ secrets.NPM_TOKEN }} --location project
+          pnpm publish --no-git-checks
       - name: Publish to GitHub Packages
         run: |
           pnpm config set //npm.pkg.github.com/:_authToken ${{ secrets.GITHUB_TOKEN }} --location project

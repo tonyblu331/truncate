@@ -6,7 +6,7 @@
 **DOM-free** text truncation. Measure & truncate text by pixel width or line count without a browser — powered by [`@chenglou/pretext`](https://github.com/chenglou/pretext).
 
 ```bash
-npm install @antonio-bonet/truncate
+npm install @tonybonet/truncate
 ```
 
 ## Quick start
