@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { truncateByLines } from "truncate";
+import { truncateByLines } from "@tonybonet/truncate";
 import { T, Slider, Textarea, Section, Code } from "./ui.tsx";
 
 const TEXT = [

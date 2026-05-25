@@ -22,7 +22,7 @@ export function T({
   role?: Role;
   size?: Sz;
   mono?: boolean;
-  as?: "p" | "span" | "div" | "label" | "h1" | "h2";
+  as?: "p" | "span" | "div" | "label" | "h1" | "h2" | "h3";
   className?: string;
   style?: React.CSSProperties;
   children: ReactNode;
@@ -43,6 +43,51 @@ export const RANGE_CLS =
 export const BTN_CLS =
   "font-mono text-s px-3 py-1.5 ring-1 ring-base/15 text-base no-underline cursor-pointer hover:bg-base hover:text-surface transition-colors";
 
+export function CopyButton({
+  content,
+  label = "copy",
+  copiedLabel = "copied",
+  className = "",
+}: {
+  content: string;
+  label?: string;
+  copiedLabel?: string;
+  className?: string;
+}) {
+  const [copied, setCopied] = useState(false);
+  return (
+    <button
+      type="button"
+      onClick={async () => {
+        await navigator.clipboard.writeText(content);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 1500);
+      }}
+      className={`${BTN_CLS} ${className}`}
+    >
+      {copied ? copiedLabel : label}
+    </button>
+  );
+}
+
+export function Badge({ children }: { children: ReactNode }) {
+  return (
+    <span className="font-mono text-xs px-1.5 py-0.5 ring-1 ring-base/15 text-base/65 uppercase tracking-wider">
+      {children}
+    </span>
+  );
+}
+
+export function PreBlock({ children, className = "" }: { children: string; className?: string }) {
+  return (
+    <pre
+      className={`font-mono text-s leading-relaxed ring-1 ring-base/15 p-4 overflow-x-auto ${className}`}
+    >
+      <code>{children}</code>
+    </pre>
+  );
+}
+
 export function Slider({
   label,
   value,
@@ -50,6 +95,9 @@ export function Slider({
   min,
   max,
   suffix = "",
+  units,
+  unit,
+  onUnitChange,
 }: {
   label: string;
   value: number;
@@ -57,8 +105,16 @@ export function Slider({
   min: number;
   max: number;
   suffix?: string;
+  units?: string[];
+  unit?: string;
+  onUnitChange?: (u: string) => void;
 }) {
   const id = `slider-${label.replace(/\s+/g, "-").toLowerCase()}`;
+  const cycle = () => {
+    if (!units || !unit || !onUnitChange) return;
+    const i = units.indexOf(unit);
+    onUnitChange(units[(i + 1) % units.length]);
+  };
   return (
     <div className="flex flex-col gap-1">
       <label htmlFor={id} className="font-mono text-s text-base uppercase">
@@ -75,9 +131,19 @@ export function Slider({
           className={RANGE_CLS}
           aria-label={label}
         />
-        <span className="font-mono text-s text-base">
+        <span className="font-mono text-s text-base whitespace-nowrap">
           {value}
-          {suffix}
+          {units && unit ? (
+            <button
+              type="button"
+              onClick={cycle}
+              className="cursor-pointer underline underline-offset-2 text-base/45 hover:text-base ml-0.5"
+            >
+              {unit}
+            </button>
+          ) : (
+            suffix
+          )}
         </span>
       </div>
     </div>
@@ -111,14 +177,12 @@ export function Section({
   title,
   desc,
   actions,
-  headerRight,
   children,
 }: {
   id: string;
   title: string;
   desc: string;
   actions?: ReactNode;
-  headerRight?: ReactNode;
   children: ReactNode;
 }) {
   return (
@@ -131,9 +195,8 @@ export function Section({
         >
           {title}
         </T>
-        {headerRight}
       </div>
-      <T role="secondary" size="m" as="p" className="leading-body mb-6">
+      <T role="secondary" size="m" as="p" className="leading-body mb-6 break-words">
         {desc}
       </T>
       {actions && <div className="flex flex-wrap items-start gap-x-6 gap-y-3 mb-4">{actions}</div>}
@@ -142,13 +205,10 @@ export function Section({
   );
 }
 
-export function Result({ children, width }: { children: ReactNode; width?: number }) {
+export function Result({ children }: { children: ReactNode }) {
   return (
-    <div
-      className="p-4 mt-4 ring-1 ring-base/15 min-h-12"
-      style={width ? { minWidth: width * 1.2, maxWidth: width * 1.2 } : undefined}
-    >
-      <T size="m" className="leading-body break-words">
+    <div className="p-4 mt-4 ring-1 ring-base/15 min-h-12">
+      <T as="div" size="m" className="leading-body break-words">
         {children}
       </T>
     </div>
@@ -156,23 +216,12 @@ export function Result({ children, width }: { children: ReactNode; width?: numbe
 }
 
 export function Code({ code }: { code: string }) {
-  const [copied, setCopied] = useState(false);
   return (
     <div className="relative mt-4">
-      <pre className="font-mono text-s leading-relaxed ring-1 ring-base/15 p-4 pt-8 overflow-x-auto">
-        <button
-          type="button"
-          onClick={async () => {
-            await navigator.clipboard.writeText(code);
-            setCopied(true);
-            setTimeout(() => setCopied(false), 1500);
-          }}
-          className="absolute -top-px right-0 font-mono text-s px-2 py-0.5 ring-1 ring-base/15 bg-surface text-base hover:bg-base hover:text-surface"
-        >
-          {copied ? "copied" : "copy"}
-        </button>
+      <CopyButton content={code} className="absolute -top-px right-0 z-10 px-2 py-0.5" />
+      <pre className="font-mono text-s leading-relaxed ring-1 ring-base/15 p-4 pt-10 overflow-x-auto max-w-full">
         <code>
-          <span key={code} className="code-content">
+          <span key={code} className="code-content block min-w-max">
             {code}
           </span>
         </code>

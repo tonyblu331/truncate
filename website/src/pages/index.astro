@@ -1,11 +1,16 @@
 ---
-import { readFileSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
+import { join } from 'node:path'
 import { gzipSync } from 'node:zlib'
 import '../assets/app.css'
 import Playground from '../components/Playground'
 import { FloatingActions } from '../components/FloatingActions'
 
-const buf = readFileSync(new URL('../../../dist/index.mjs', import.meta.url))
+const bundlePath = [join(process.cwd(), 'dist/index.mjs'), join(process.cwd(), '../dist/index.mjs')].find(existsSync)
+if (!bundlePath) {
+  throw new Error('Expected dist/index.mjs. Run the package build before building the website.')
+}
+const buf = readFileSync(bundlePath)
 const rawKb = (buf.length / 1024).toFixed(1)
 const gzipKb = (gzipSync(buf).length / 1024).toFixed(1)
 ---

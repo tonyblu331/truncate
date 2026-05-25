@@ -1,0 +1,75 @@
+name: Release
+
+on:
+  workflow_dispatch:
+  release:
+    types: [published]
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    name: publish
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: pnpm
+          registry-url: https://registry.npmjs.org
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+      - run: pnpm check
+      - run: pnpm test
+      - name: Publish to npm
+        shell: bash
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          versions="$(npm view "$npm_package_name" versions --json 2>/dev/null || true)"
+          if node -e 'const versions = JSON.parse(process.argv[1] || "[]"); process.exit([versions].flat().includes(process.argv[2]) ? 0 : 1)' "${versions:-[]}" "$npm_package_version"; then
+            echo "$npm_package_name@$npm_package_version is already published on npm."
+          elif [ -z "$versions" ] && npm access get status "$npm_package_name" >/dev/null 2>&1; then
+            echo "$npm_package_name exists on npm, but its packument is not readable yet. Skipping npm publish to avoid a duplicate publish."
+          elif [ -n "${NODE_AUTH_TOKEN:-}" ]; then
+            npm publish --access public --provenance
+          else
+            echo "Skipping npm publish because NPM_TOKEN is not configured and npm trusted publishing is not enabled yet."
+            echo "Run: npm trust github $npm_package_name --repo tonyblu331/truncate --file release.yml"
+          fi
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: pnpm
+          registry-url: https://npm.pkg.github.com
+          scope: "@tonyblu331"
+      - name: Publish to GitHub Packages
+        shell: bash
+        run: |
+          node <<'NODE'
+          const fs = require("node:fs");
+          const pkg = JSON.parse(fs.readFileSync("package.json", "utf8"));
+          pkg.name = "@tonyblu331/truncate";
+          pkg.publishConfig = {
+            access: "public",
+            registry: "https://npm.pkg.github.com/"
+          };
+          fs.writeFileSync("package.json", JSON.stringify(pkg, null, 2) + "\n");
+          NODE
+          if npm view "@tonyblu331/truncate@$npm_package_version" version --registry https://npm.pkg.github.com >/dev/null 2>&1; then
+            echo "@tonyblu331/truncate@$npm_package_version is already published on GitHub Packages."
+            exit 0
+          fi
+          npm publish --access public --ignore-scripts --registry https://npm.pkg.github.com
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -1,8 +1,19 @@
 {
   "name": "@tonybonet/truncate",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "DOM-free text truncation powered by @chenglou/pretext",
-  "homepage": "https://github.com/tonyblu331/truncate#readme",
+  "keywords": [
+    "canvas",
+    "ellipsis",
+    "grapheme",
+    "pretext",
+    "react",
+    "text",
+    "truncate",
+    "typography",
+    "ui"
+  ],
+  "homepage": "https://tonyblu331.github.io/truncate/",
   "bugs": {
     "url": "https://github.com/tonyblu331/truncate/issues"
   },
@@ -13,10 +24,12 @@
     "url": "git+https://github.com/tonyblu331/truncate.git"
   },
   "files": [
+    "assets",
     "dist"
   ],
   "type": "module",
   "sideEffects": false,
+  "types": "./dist/index.d.mts",
   "exports": {
     ".": "./dist/index.mjs",
     "./package.json": "./package.json"
@@ -30,8 +43,8 @@
     "dev": "vp pack --watch",
     "test": "vp test",
     "check": "vp check",
-    "prepublishOnly": "vp run build",
-    "prepare": "vp config"
+    "prepack": "vp pack",
+    "prepublishOnly": "vp check && vp test"
   },
   "dependencies": {
     "@chenglou/pretext": "^0.0.7"

@@ -1,6 +1,7 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
+import { useScrollPastViewport } from "./hooks";
 
-const THRESHOLD = 1.4;
+const THRESHOLD = 0.5;
 
 function CopyCmd({ cmd }: { cmd: string }) {
   const [copied, setCopied] = useState(false);
@@ -29,24 +30,11 @@ function CopyCmd({ cmd }: { cmd: string }) {
 }
 
 export function FloatingActions() {
-  const [visible, setVisible] = useState(false);
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-    const onScroll = () => {
-      setVisible(window.scrollY > window.innerHeight * THRESHOLD);
-    };
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
+  const visible = useScrollPastViewport(THRESHOLD);
 
   const scrollToTop = useCallback(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, []);
-
-  if (!mounted) return null;
 
   return (
     <div
@@ -78,14 +66,16 @@ export function FloatingActions() {
           <p className="px-1 pb-0.5 font-sans text-[11px] uppercase tracking-wider text-dim">
             Install
           </p>
-          <CopyCmd cmd="pnpm add truncate" />
-          <CopyCmd cmd="npm install truncate" />
+          <CopyCmd cmd="pnpm add @tonybonet/truncate" />
+          <CopyCmd cmd="npm install @tonybonet/truncate" />
         </div>
 
         <div className="h-px bg-white/[0.08]" />
 
         <a
-          href="/docs"
+          href="https://github.com/tonyblu331/truncate?tab=readme-ov-file#api"
+          target="_blank"
+          rel="noreferrer"
           className="flex w-full items-center gap-2.5 px-4 py-3 font-sans text-m transition-[transform,background] duration-150 ease-out hover:bg-white/5 active:scale-[.97]"
         >
           <span className="text-dim" aria-hidden>

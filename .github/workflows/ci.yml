@@ -1,4 +1,4 @@
-name: CI/CD
+name: CI
 
 on:
   push:
@@ -10,48 +10,30 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+permissions:
+  contents: read
+
 jobs:
-  test:
+  verify:
+    name: verify
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
           node-version: 22
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm build
+      - run: pnpm check
       - run: pnpm test
 
-  publish:
-    needs: test
-    if: github.ref == 'refs/heads/master'
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
-      id-token: write
-    steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm build
-      - name: Publish to npm
-        run: |
-          pnpm config set //registry.npmjs.org/:_authToken ${{ secrets.NPM_TOKEN }} --location project
-          pnpm publish --no-git-checks
-      - name: Publish to GitHub Packages
-        run: |
-          pnpm config set //npm.pkg.github.com/:_authToken ${{ secrets.GITHUB_TOKEN }} --location project
-          pnpm publish --registry https://npm.pkg.github.com --no-git-checks
-
   deploy:
-    needs: test
+    needs: verify
     if: github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
     permissions:
@@ -62,7 +44,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
           node-version: 22
           cache: pnpm
