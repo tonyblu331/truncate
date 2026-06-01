@@ -6,7 +6,7 @@
 
 [![npm](https://img.shields.io/npm/v/@tonybonet/truncate?label=npm&color=111318)](https://www.npmjs.com/package/@tonybonet/truncate)
 [![downloads](https://img.shields.io/npm/dm/@tonybonet/truncate?label=downloads&color=111318)](https://www.npmjs.com/package/@tonybonet/truncate)
-[![bundle size](https://img.shields.io/bundlephobia/minzip/@tonybonet/truncate?color=111318)](https://bundlephobia.com/package/@tonybonet/truncate)
+[![bundle size](https://img.shields.io/bundlephobia/minzip/@tonybonet/truncate@0.4.2?color=111318)](https://bundlephobia.com/package/@tonybonet/truncate@0.4.2)
 [![license](https://img.shields.io/npm/l/@tonybonet/truncate?color=111318)](LICENSE)
 
 DOM-free core, grapheme-safe text truncation for JavaScript and TypeScript, powered by [`@chenglou/pretext`](https://github.com/chenglou/pretext). Fit copy by pixel width, line count, target string, explicit range, or measured height without layout reads; opt into element binding only when component code already owns a DOM-compatible node.
