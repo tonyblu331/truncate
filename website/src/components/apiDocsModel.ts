@@ -52,6 +52,35 @@ export const recipeDocs: ApiRecipeDoc[] = [
     example: `truncateByWidth(title, {\n  font: "16px Inter",\n  maxWidth: "32ch",\n})`,
   },
   {
+    id: "recipe-custom-marker",
+    title: "Use custom markers",
+    description:
+      "`ellipsis` is the truncation marker string. Use one dot, five dots, or words like READ MORE; keep fades in the UI layer.",
+    example: `truncateByWidth(articleIntro, {
+  font: "16px Inter",
+  maxWidth: 260,
+  ellipsis: " READ MORE",
+})`,
+  },
+  {
+    id: "recipe-element-bound",
+    title: "Bind to an element",
+    description:
+      "Use `createTruncator(element)` when component code already has a DOM-compatible element or adapter. Width and styles are read at bind time; text is read per call and written back.",
+    example: `const element = document.querySelector("[data-truncate]")!
+const t = createTruncator(element)
+
+t.truncate({ maxLines: 2 })
+
+const adapter = {
+  nodeType: 1 as const,
+  textContent: "Custom renderer label",
+  getBoundingClientRect: () => ({ width: 180 }),
+}
+
+createTruncator(adapter).truncate()`,
+  },
+  {
     id: "recipe-factory",
     title: "Pre-bind repeated options",
     description:
@@ -86,7 +115,7 @@ export const functionDocs: ApiFunctionDoc[] = [
       {
         name: "options.ellipsis",
         type: "string",
-        description: "Suffix appended on truncation. Default: `…`",
+        description: "Custom marker appended on truncation. Default: `…`",
       },
       { name: "options.font", type: "string", description: "Canvas-compatible CSS font shorthand" },
       { name: "options.wordBreak", type: "WordBreakMode", description: "`normal` or `keep-all`" },
@@ -210,10 +239,17 @@ export const functionDocs: ApiFunctionDoc[] = [
     id: "fn-createTruncator",
     title: "createTruncator",
     badge: "factory",
-    description: "Pre-binds shared options for repeated truncation calls.",
-    signature: "createTruncator(config: Partial<TruncateOptions>): Truncator",
-    returns: "Truncator",
-    example: `const t = createTruncator({ font: "16px Inter", lineHeight: 22 })\nt.truncateByLines(longArticle, { maxWidth: 320, maxLines: 3 })`,
+    description:
+      "Pre-binds shared text options, or binds to a DOM-compatible element/adapter for component code.",
+    signature: `createTruncator(config: Partial<TruncateOptions>): Truncator
+createTruncator(element: DOMCompatibleElement): BoundTruncator`,
+    returns: "Truncator | BoundTruncator",
+    example: `const textTruncator = createTruncator({ font: "16px Inter", lineHeight: 22 })
+textTruncator.truncateByLines(longArticle, { maxWidth: 320, maxLines: 3 })
+
+const element = document.querySelector("[data-truncate]")!
+const elementTruncator = createTruncator(element)
+elementTruncator.truncate({ maxLines: 2 })`,
   },
   {
     id: "fn-detectFont",
@@ -259,6 +295,36 @@ export const typeDocs: ApiTypeDoc[] = [
     signature:
       "interface Truncator {\n  truncateByWidth(text: string, opts?: Partial<TruncateOptions>): TruncateResult\n  truncateByLines(text: string, opts?: Partial<TruncateOptions>): TruncateResult\n  truncateStart(text: string, opts?: Partial<TruncateOptions>): TruncateResult\n  truncateMiddle(text: string, opts?: Partial<TruncateOptions>): TruncateResult\n  truncateAtOffset(text: string, opts?: Partial<TruncateOptions & { offset?: number }>): TruncateResult\n  truncateRange(text: string, opts?: Partial<TruncateOptions & { start?: number; end?: number; context?: number; before?: number; after?: number }>): TruncateResult\n  truncateAround(text: string, opts?: Partial<TruncateOptions & { target?: string; context?: number; before?: number; after?: number }>): TruncateResult\n  measureHeight(text: string, opts?: Partial<MeasureOptions>): number\n}",
   },
+  {
+    id: "type-BoundTruncator",
+    title: "BoundTruncator",
+    signature: `interface BoundTruncator {\n  truncate(opts?: Partial<TruncateOptions>): TruncateResult\n  truncateByWidth(opts?: Partial<TruncateOptions>): TruncateResult\n  truncateByLines(opts?: Partial<TruncateOptions>): TruncateResult\n  truncateStart(opts?: Partial<TruncateOptions>): TruncateResult\n  truncateMiddle(opts?: Partial<TruncateOptions>): TruncateResult\n  truncateAtOffset(opts?: Partial<TruncateOptions & { offset?: number }>): TruncateResult\n  truncateRange(opts?: Partial<TruncateOptions & { start?: number; end?: number; context?: number; before?: number; after?: number }>): TruncateResult\n  truncateAround(opts?: Partial<TruncateOptions & { target?: string; context?: number; before?: number; after?: number }>): TruncateResult\n  measureHeight(opts?: Partial<MeasureOptions>): number\n}`,
+    description:
+      "Element-bound truncator returned by `createTruncator(element)`. Accepts DOM nodes, custom elements, or DOM-compatible objects; reads current textContent per call, writes back the result, and avoids compounding prior write-back. Recreate it when styles change.",
+  },
+  {
+    id: "type-DOMCompatibleElement",
+    title: "DOMCompatibleElement",
+    signature: `interface DOMNativeElementLike {
+  readonly nodeType: number
+  textContent: string | null
+  readonly clientWidth: number
+  getBoundingClientRect: () => { width?: number }
+}
+
+type DOMCompatibleAdapter = {
+  readonly nodeType: 1
+  textContent: string | null
+  readonly computedStyle?: Record<string, string | undefined>
+} & (
+  | { readonly clientWidth: number; getBoundingClientRect?: () => { width?: number } }
+  | { readonly clientWidth?: number; getBoundingClientRect: () => { width?: number } }
+)
+
+type DOMCompatibleElement = DOMNativeElementLike | DOMCompatibleAdapter`,
+    description:
+      "Native DOM elements match this shape structurally; custom adapters can provide the same surface with optional `computedStyle`. A width source is required before binding, and the exported declarations do not require the DOM lib for core-only consumers.",
+  },
   { id: "type-CssWidth", title: "CssWidth", signature: "type CssWidth = number | string" },
   {
     id: "type-WordBreakMode",
@@ -279,7 +345,7 @@ export const optionRows = [
   ["lineHeight", "number", "20 for line truncation", "Lines and height"],
   ["maxLines", "number", "1", "truncateByLines"],
   ["keepLines", "number[]", "—", "truncateByLines"],
-  ["ellipsis", "string", "…", "Truncation APIs"],
+  ["ellipsis", "string", "…", "Custom marker or suffix"],
   ["wordBreak", "WordBreakMode", "normal", "Passed to Pretext"],
   ["letterSpacing", "number", "—", "Passed to Pretext"],
   ["whiteSpace", "WhiteSpaceMode", "normal", "Passed to Pretext"],

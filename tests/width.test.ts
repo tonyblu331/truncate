@@ -44,6 +44,25 @@ test("truncateByWidth: custom ellipsis", () => {
   expect(r.truncated).toBe(true);
 });
 
+test("truncateByWidth: supports one-character custom marker", () => {
+  const r = truncateByWidth(LONG, { font: FONT, maxWidth: 90, ellipsis: "." });
+  expect(r.text.endsWith(".")).toBe(true);
+  expect(r.text.endsWith("…")).toBe(false);
+  expect(r.truncated).toBe(true);
+});
+
+test("truncateByWidth: supports five-character custom marker", () => {
+  const r = truncateByWidth(LONG, { font: FONT, maxWidth: 120, ellipsis: "....." });
+  expect(r.text.endsWith(".....")).toBe(true);
+  expect(r.truncated).toBe(true);
+});
+
+test("truncateByWidth: supports word-style custom marker", () => {
+  const r = truncateByWidth(LONG, { font: FONT, maxWidth: 160, ellipsis: " READ MORE" });
+  expect(r.text.endsWith(" READ MORE")).toBe(true);
+  expect(r.truncated).toBe(true);
+});
+
 // ── truncateMiddle ─────────────────────────────────────────────
 
 test("truncateMiddle: short text fits", () => {

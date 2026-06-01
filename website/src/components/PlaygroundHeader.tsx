@@ -1,4 +1,3 @@
-import CompressionInstrument from "./CompressionInstrument";
 import { BTN_CLS, T } from "./ui.tsx";
 import { INSTALL } from "./playgroundData";
 
@@ -14,7 +13,7 @@ export default function PlaygroundHeader({
   return (
     <header className="pt-20 pb-10 mb-16 ring-0 ring-b-base/15 ring-b-1">
       <T role="dim" size="s" mono className="block mb-3 uppercase tracking-wider">
-        DOM-free text fitting engine
+        DOM-free core text fitting engine
       </T>
       <T as="h1" size="l" className="mb-2 leading-heading text-balance">
         Truncate
@@ -33,8 +32,6 @@ export default function PlaygroundHeader({
           </span>
         ))}
       </div>
-
-      <CompressionInstrument />
 
       <div className="flex flex-wrap items-center gap-2 mb-4">
         {INSTALL.map(({ label, cmd }) => (

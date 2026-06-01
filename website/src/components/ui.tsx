@@ -94,6 +94,7 @@ export function Slider({
   onChange,
   min,
   max,
+  step = 1,
   suffix = "",
   units,
   unit,
@@ -104,6 +105,7 @@ export function Slider({
   onChange: (v: number) => void;
   min: number;
   max: number;
+  step?: number;
   suffix?: string;
   units?: string[];
   unit?: string;
@@ -126,6 +128,7 @@ export function Slider({
           type="range"
           min={min}
           max={max}
+          step={step}
           value={value}
           onChange={(e) => onChange(+e.target.value)}
           className={RANGE_CLS}
