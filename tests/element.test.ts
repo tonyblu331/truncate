@@ -279,7 +279,7 @@ test("explicit lineHeight overrides inferred lineHeight", () => {
 });
 
 test("explicit ellipsis overrides default …", () => {
-  const el = mockElement(LONG, {}, 50);
+  const el = mockElement(LONG, {}, 120);
   const t = createTruncator(el);
   const r = t.truncateByWidth({ ellipsis: " [more]" });
   expect(r.text).toMatch(/\[more\]$/);
