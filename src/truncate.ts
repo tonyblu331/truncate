@@ -4,7 +4,11 @@ import { truncateByWidth } from "./width.js";
 
 export { detectFont, register } from "./measurement.js";
 export type {
+  BoundTruncator,
   CssWidth,
+  DOMCompatibleAdapter,
+  DOMCompatibleElement,
+  DOMCompatibleStyle,
   MeasureOptions,
   TruncateOptions,
   TruncateResult,

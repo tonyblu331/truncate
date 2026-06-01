@@ -1,15 +1,15 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/tonyblu331/truncate/master/assets/truncate-banner.svg" alt="Truncate: match-aware text truncation" width="100%" />
+  <img src="https://raw.githubusercontent.com/tonyblu331/truncate/master/assets/truncate-cover.jpg" alt="truncate: measured text truncation cover" width="100%" />
 </p>
 
-# truncate: DOM-free text truncation for JavaScript
+# truncate: DOM-free core text truncation for JavaScript
 
 [![npm](https://img.shields.io/npm/v/@tonybonet/truncate?label=npm&color=111318)](https://www.npmjs.com/package/@tonybonet/truncate)
 [![downloads](https://img.shields.io/npm/dm/@tonybonet/truncate?label=downloads&color=111318)](https://www.npmjs.com/package/@tonybonet/truncate)
 [![bundle size](https://img.shields.io/bundlephobia/minzip/@tonybonet/truncate?color=111318)](https://bundlephobia.com/package/@tonybonet/truncate)
 [![license](https://img.shields.io/npm/l/@tonybonet/truncate?color=111318)](LICENSE)
 
-DOM-free, grapheme-safe text truncation for JavaScript and TypeScript, powered by [`@chenglou/pretext`](https://github.com/chenglou/pretext). Fit copy by pixel width, line count, target string, explicit range, or measured height without layout reads.
+DOM-free core, grapheme-safe text truncation for JavaScript and TypeScript, powered by [`@chenglou/pretext`](https://github.com/chenglou/pretext). Fit copy by pixel width, line count, target string, explicit range, or measured height without layout reads; opt into element binding only when component code already owns a DOM-compatible node.
 
 Use it when CSS ellipsis is too blunt: search snippets, support queues, command palettes, log rows, table cells, filenames, URLs, and previews where the important text can be buried in the middle.
 
@@ -84,7 +84,7 @@ Yes. Use `truncateRange` with `start` and `end` grapheme offsets. This avoids re
 
 ### Does it need the DOM?
 
-No DOM layout reads are required. Measurement uses Canvas2D through browser canvas, `OffscreenCanvas`, or a Node canvas polyfill.
+Core functions do not require DOM layout reads. Measurement uses Canvas2D through browser canvas, `OffscreenCanvas`, or a Node canvas polyfill. The optional element-bound helper reads style and width once when you pass it to `createTruncator(element)`, then reads `textContent` per call.
 
 ## Quick Start
 
@@ -96,6 +96,13 @@ truncate("A very long string", {
   maxWidth: 100,
 });
 // -> width truncation
+
+truncate("A very long string", {
+  font: "16px Inter",
+  maxWidth: 140,
+  ellipsis: " READ MORE",
+});
+// -> custom truncation marker
 
 truncate(longArticle, {
   font: "16px Inter",
@@ -149,7 +156,7 @@ result.text;
 result.metrics.rangePreserved;
 ```
 
-If the target itself is too wide, `rangePreserved` becomes `false` and the target is squeezed instead of lying to you. Buenísimo: the API tells you when the impossible thing was impossible.
+If the target itself is too wide, `rangePreserved` becomes `false` and the target is squeezed instead of lying to you. The API tells you when the impossible thing was impossible.
 
 ### Preserve Known Offsets
 
@@ -193,6 +200,52 @@ bodyText.truncateByWidth(title, { maxWidth: "32ch" });
 bodyText.truncateByLines(summary, { maxWidth: 360, maxLines: 3 });
 bodyText.truncateAround(logLine, { maxWidth: 280, target: "ERROR", context: 12 });
 ```
+
+### Use Custom Markers
+
+`ellipsis` is just the suffix string. It can be one character, five characters, or words. The library computes the text; visual fades stay in your UI layer.
+
+```ts
+truncateByWidth(mediaTitle, { font: "16px Inter", maxWidth: 220, ellipsis: "." });
+truncateByWidth(gifName, { font: "16px Inter", maxWidth: 220, ellipsis: "....." });
+truncateByWidth(articleIntro, { font: "16px Inter", maxWidth: 260, ellipsis: " READ MORE" });
+```
+
+### Bind to a DOM-Compatible Element
+
+When you already have a real DOM element, custom element, or DOM-compatible object, bind once. After that, calls do not take an element reference, `font`, or text. Width and other options can still override inferred defaults after binding, but the element must provide an initial width source.
+
+```ts
+const title = document.querySelector("[data-truncate]")!;
+const titleTruncator = createTruncator(title);
+
+titleTruncator.truncate();
+titleTruncator.truncate({ maxLines: 2 });
+titleTruncator.truncateMiddle({ ellipsis: "....." });
+```
+
+The bound truncator avoids compounded truncation: if it wrote a previous result, the next call still uses the last source text unless external code changes `textContent`.
+
+The plain `truncate(text, options)` entry stays text-only. This keeps the DOM boundary explicit and avoids a second DOM-shaped entry point.
+
+For custom renderers, tests, or non-browser integrations, pass a small adapter with `nodeType: 1`, `textContent`, a width source, and optional `computedStyle`:
+
+```ts
+const label = {
+  nodeType: 1 as const,
+  textContent: "A long label that needs truncation",
+  getBoundingClientRect: () => ({ width: 180 }),
+  computedStyle: {
+    fontSize: "16px",
+    fontFamily: "Inter, sans-serif",
+    lineHeight: "normal",
+  },
+};
+
+createTruncator(label).truncate();
+```
+
+See [`docs/element-bound.md`](docs/element-bound.md) for the full adapter contract, width requirement, style inference rules, and no-DOM TypeScript notes.
 
 ## API
 
@@ -306,7 +359,7 @@ measureHeight("Hello\nworld", {
 
 ### `createTruncator(config)`
 
-Pre-binds shared options for repeated calls.
+Pre-binds shared options for repeated text calls.
 
 ```ts
 const t = createTruncator({ font: "16px Inter", lineHeight: 22 });
@@ -315,6 +368,38 @@ t.truncateByWidth("Hello", { maxWidth: 200 });
 t.truncateByLines(longArticle, { maxWidth: 320, maxLines: 3 });
 t.measureHeight("Hello\nworld", { maxWidth: 320 });
 ```
+
+### `createTruncator(element)`
+
+Component convenience for DOM or DOM-compatible code. It accepts any `DOMCompatibleElement`: normal DOM nodes, custom elements, or objects that expose `nodeType`, `textContent`, a width source, and optional `computedStyle`. It reads style and width at creation time, reads current `textContent` per call, and writes the truncated text back without compounding prior write-back.
+
+```ts
+const element = document.querySelector("[data-truncate]")!;
+const t = createTruncator(element);
+
+t.truncate();
+t.truncate({ maxLines: 2 });
+t.truncateStart({ ellipsis: " READ MORE" });
+```
+
+For custom adapters, provide the DOM-compatible surface directly:
+
+```ts
+const element = {
+  nodeType: 1 as const,
+  textContent: "A long label that needs truncation",
+  getBoundingClientRect: () => ({ width: 180 }),
+  computedStyle: {
+    fontSize: "16px",
+    fontFamily: "Inter, sans-serif",
+    lineHeight: "normal",
+  },
+};
+
+createTruncator(element).truncate();
+```
+
+Custom adapters without `computedStyle` use safe font defaults and do not call browser `getComputedStyle`. Every adapter must still provide `clientWidth` or `getBoundingClientRect().width` before binding.
 
 ### `detectFont()` and `register(selector, config)`
 
@@ -338,7 +423,7 @@ truncateByWidth("Hello", {
 | `font`          | `string`                 | auto-detect in browser   | measurement APIs              |
 | `selector`      | `string`                 | -                        | font lookup                   |
 | `maxWidth`      | `CssWidth`               | required                 | truncation and measurement    |
-| `ellipsis`      | `string`                 | `…`                      | truncation                    |
+| `ellipsis`      | `string`                 | `…`                      | custom marker or suffix       |
 | `maxLines`      | `number`                 | `1`                      | `truncate`, `truncateByLines` |
 | `keepLines`     | `number[]`               | -                        | `truncate`, `truncateByLines` |
 | `lineHeight`    | `number`                 | `20` for line truncation | lines and height              |
@@ -375,6 +460,40 @@ interface TruncateResult {
     rangePreserved?: boolean;
   };
 }
+
+interface BoundTruncator {
+  truncate(opts?: Partial<TruncateOptions>): TruncateResult;
+  truncateByWidth(opts?: Partial<TruncateOptions>): TruncateResult;
+  truncateByLines(opts?: Partial<TruncateOptions>): TruncateResult;
+  truncateMiddle(opts?: Partial<TruncateOptions>): TruncateResult;
+  truncateStart(opts?: Partial<TruncateOptions>): TruncateResult;
+  truncateAtOffset(opts?: Partial<TruncateOptions & { offset?: number }>): TruncateResult;
+  truncateRange(opts?: Partial<TruncateOptions & { start?: number; end?: number }>): TruncateResult;
+  truncateAround(
+    opts?: Partial<
+      TruncateOptions & { target?: string; context?: number; before?: number; after?: number }
+    >,
+  ): TruncateResult;
+  measureHeight(opts?: Partial<MeasureOptions>): number;
+}
+
+interface DOMNativeElementLike {
+  readonly nodeType: number;
+  textContent: string | null;
+  readonly clientWidth: number;
+  getBoundingClientRect: () => { width?: number };
+}
+
+type DOMCompatibleAdapter = {
+  readonly nodeType: 1;
+  textContent: string | null;
+  readonly computedStyle?: Record<string, string | undefined>;
+} & (
+  | { readonly clientWidth: number; getBoundingClientRect?: () => { width?: number } }
+  | { readonly clientWidth?: number; getBoundingClientRect: () => { width?: number } }
+);
+
+type DOMCompatibleElement = DOMNativeElementLike | DOMCompatibleAdapter;
 ```
 
 ## Notes

@@ -1,4 +1,5 @@
 import CjkDemo from "./CjkDemo";
+import CustomTruncationDemo from "./CustomTruncationDemo";
 import FactoryDemo from "./FactoryDemo";
 import LanguageDemo from "./LanguageDemo";
 import LetterSpacingDemo from "./LetterSpacingDemo";
@@ -11,6 +12,8 @@ export default function PlaygroundDemos() {
   return (
     <>
       <WidthDemo />
+      <Divider />
+      <CustomTruncationDemo />
       <Divider />
       <TargetRangeDemo />
       <Divider />

@@ -38,6 +38,51 @@ export const SELECTORS = SELS.map((s) => ({ value: s, label: s }));
 
 export const UNITS = ["px", "rem", "em", "ch", "vw", "vh", "vmin", "vmax"];
 
+export const CUSTOM_CASES = {
+  readmore: {
+    label: "Words",
+    method: "truncateByWidth",
+    text: "When product copy needs a continuation affordance, the truncation token can be words instead of punctuation. The UI can fade the clipped copy and then show READ MORE as the continuation.",
+    marker: " READ MORE",
+    width: 280,
+    preview: [],
+  },
+  gif: {
+    label: "🐈 GIF",
+    method: "truncateMiddle",
+    text: "Campaign URL: https://media.giphy.com/media/JIX9t2j0ZTN9S/giphy.gif?cid=truncate-playground&rid=giphy.gif&ct=g",
+    marker: " 🐈 ",
+    width: 300,
+    markerVisual: {
+      kind: "image",
+      label: "GIPHY GIF",
+      src: "https://media.giphy.com/media/JIX9t2j0ZTN9S/giphy.gif",
+    },
+  },
+  media: {
+    label: "🎬 Video",
+    method: "truncateMiddle",
+    text: "CDN queue: https://res.cloudinary.com/demo/video/upload/q_auto:good,w_1280/dog.mp4 is ready beside https://res.cloudinary.com/demo/image/upload/f_auto,q_auto/sample.jpg",
+    marker: " 🎬 ",
+    width: 300,
+    markerVisual: {
+      kind: "video",
+      label: "Cloudinary video",
+      src: "https://res.cloudinary.com/demo/video/upload/q_auto:good,w_1280/dog.mp4",
+    },
+  },
+  emoji: {
+    label: "🙂 Safe emoji",
+    method: "truncateByWidth",
+    text: "Status update: safe emoji 🙂 🚀 ⭐ ✨ should stay whole when the copy is measured and shortened",
+    marker: " 🙂",
+    width: 230,
+    preview: [],
+  },
+} as const;
+
+export const CUSTOM_CASE_NAMES = ["readmore", "gif", "media", "emoji"] as const;
+
 export function short(s: string, n = 40): string {
   return s.length > n ? s.slice(0, n) + "…" : s;
 }

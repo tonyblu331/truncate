@@ -38,7 +38,7 @@ export function FloatingActions() {
 
   return (
     <div
-      className="fixed bottom-6 right-6 z-50"
+      className="fixed bottom-6 right-6 z-50 hidden 2xl:block"
       style={{
         transformOrigin: "bottom right",
         clipPath: visible ? "circle(150% at bottom right)" : "circle(0% at bottom right)",
