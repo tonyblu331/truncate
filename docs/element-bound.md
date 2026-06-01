@@ -2,7 +2,7 @@
 
 `createTruncator(element)` is the explicit DOM boundary for this package. The core API remains text-first and DOM-free; element binding is for component code that already owns a node or a DOM-compatible adapter.
 
-Use it when you want to bind once, infer defaults from the element, and then call truncation methods without passing `(element)` or `(text)` every time.
+Use it when you want to bind once, infer defaults from the element, and then call truncation methods without passing `(element)`, `(text)`, or `font` every time. The bound API reads typography internally; callers usually only pass content options such as `maxLines`, `ellipsis`, or an operation-specific `maxWidth`.
 
 ```ts
 import { createTruncator, type DOMCompatibleElement } from "@tonybonet/truncate";
@@ -12,7 +12,7 @@ const t = createTruncator(title);
 
 t.truncate();
 t.truncate({ maxLines: 2 });
-t.truncateMiddle({ ellipsis: "....." });
+t.truncateMiddle({ maxWidth: "40ch", ellipsis: "....." });
 ```
 
 ## Contract
@@ -24,6 +24,7 @@ t.truncateMiddle({ ellipsis: "....." });
 - The result is written back to `element.textContent`.
 - Repeated calls do not compound prior write-back; the bound truncator keeps the last external source text unless outside code changes `textContent`.
 - If styles change, create a new bound truncator.
+- Per-call `maxWidth` overrides are optional and can use supported CSS width units.
 
 ## What Counts as DOM-Compatible
 
@@ -82,7 +83,9 @@ t.truncate();
 // label.textContent now contains the truncated result
 ```
 
-## Width Requirement
+## Width and `maxWidth`
+
+For normal element-bound usage, you do not calculate or pass `maxWidth`. The library reads the element's own rendered width and uses that as the default `maxWidth`.
 
 An element must provide width at bind time:
 
@@ -102,7 +105,17 @@ const missingWidth = {
 createTruncator(missingWidth as unknown as DOMCompatibleElement);
 ```
 
-Per-call `maxWidth` can override the cached width for an operation, but it does not replace the bind-time width requirement. The bound API needs a safe default before it can create the truncator.
+Per-call `maxWidth` overrides the cached element width for one operation. It can be a number or a supported CSS width string, including `px`, `rem`, `em`, `ch`, `vw`, and `vh`. `em` and `ch` are resolved against the inferred element font, so you do not need to pass `font` just to use those units.
+
+```ts
+const t = createTruncator(document.querySelector("[data-truncate]")!);
+
+t.truncate(); // uses the element width
+t.truncate({ maxWidth: "32ch" }); // overrides width, keeps inferred font
+t.truncateByLines({ maxWidth: "24em", maxLines: 2 });
+```
+
+A per-call override does not replace the bind-time width requirement. The bound API still needs a safe default width before it can create the truncator.
 
 ## Style Inference
 

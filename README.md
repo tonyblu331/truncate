@@ -213,7 +213,7 @@ truncateByWidth(articleIntro, { font: "16px Inter", maxWidth: 260, ellipsis: " R
 
 ### Bind to a DOM-Compatible Element
 
-When you already have a real DOM element, custom element, or DOM-compatible object, bind once. After that, calls do not take an element reference, `font`, or text. Width and other options can still override inferred defaults after binding, but the element must provide an initial width source.
+When you already have a real DOM element, custom element, or DOM-compatible object, bind once. After that, calls do not take an element reference, `font`, or text. The library reads the element's computed typography internally and uses the element's rendered width as `maxWidth` by default. Pass `maxWidth` only when you want an operation-specific override; that override can be a number or CSS width such as `18rem`, `32em`, `40ch`, `50vw`, or `50vh`.
 
 ```ts
 const title = document.querySelector("[data-truncate]")!;
@@ -221,7 +221,7 @@ const titleTruncator = createTruncator(title);
 
 titleTruncator.truncate();
 titleTruncator.truncate({ maxLines: 2 });
-titleTruncator.truncateMiddle({ ellipsis: "....." });
+titleTruncator.truncateMiddle({ maxWidth: "40ch", ellipsis: "....." });
 ```
 
 The bound truncator avoids compounded truncation: if it wrote a previous result, the next call still uses the last source text unless external code changes `textContent`.
@@ -245,7 +245,7 @@ const label = {
 createTruncator(label).truncate();
 ```
 
-See [`docs/element-bound.md`](docs/element-bound.md) for the full adapter contract, width requirement, style inference rules, and no-DOM TypeScript notes.
+See [`docs/element-bound.md`](docs/element-bound.md) for the full adapter contract, width requirement, `maxWidth` override rules, style inference rules, and no-DOM TypeScript notes.
 
 ## API
 
@@ -371,7 +371,7 @@ t.measureHeight("Hello\nworld", { maxWidth: 320 });
 
 ### `createTruncator(element)`
 
-Component convenience for DOM or DOM-compatible code. It accepts any `DOMCompatibleElement`: normal DOM nodes, custom elements, or objects that expose `nodeType`, `textContent`, a width source, and optional `computedStyle`. It reads style and width at creation time, reads current `textContent` per call, and writes the truncated text back without compounding prior write-back.
+Component convenience for DOM or DOM-compatible code. It accepts any `DOMCompatibleElement`: normal DOM nodes, custom elements, or objects that expose `nodeType`, `textContent`, a width source, and optional `computedStyle`. It reads typography and width at creation time, reads current `textContent` per call, and writes the truncated text back without compounding prior write-back. You do not pass `font` for normal element-bound calls; only pass `maxWidth` when overriding the element width for a specific operation.
 
 ```ts
 const element = document.querySelector("[data-truncate]")!;
@@ -379,7 +379,7 @@ const t = createTruncator(element);
 
 t.truncate();
 t.truncate({ maxLines: 2 });
-t.truncateStart({ ellipsis: " READ MORE" });
+t.truncateStart({ maxWidth: "32ch", ellipsis: " READ MORE" });
 ```
 
 For custom adapters, provide the DOM-compatible surface directly:
@@ -422,7 +422,7 @@ truncateByWidth("Hello", {
 | --------------- | ------------------------ | ------------------------ | ----------------------------- |
 | `font`          | `string`                 | auto-detect in browser   | measurement APIs              |
 | `selector`      | `string`                 | -                        | font lookup                   |
-| `maxWidth`      | `CssWidth`               | required                 | truncation and measurement    |
+| `maxWidth`      | `CssWidth`               | required unless bound    | truncation and measurement    |
 | `ellipsis`      | `string`                 | `…`                      | custom marker or suffix       |
 | `maxLines`      | `number`                 | `1`                      | `truncate`, `truncateByLines` |
 | `keepLines`     | `number[]`               | -                        | `truncate`, `truncateByLines` |
