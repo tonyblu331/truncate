@@ -240,7 +240,7 @@ export const functionDocs: ApiFunctionDoc[] = [
     title: "createTruncator",
     badge: "factory",
     description:
-      "Pre-binds shared text options, or binds to a DOM-compatible element/adapter for component code.",
+      "Pre-binds shared text options, or binds to a DOM-compatible element/adapter and infers its typography and width.",
     signature: `createTruncator(config: Partial<TruncateOptions>): Truncator
 createTruncator(element: DOMCompatibleElement): BoundTruncator`,
     returns: "Truncator | BoundTruncator",
@@ -249,7 +249,8 @@ textTruncator.truncateByLines(longArticle, { maxWidth: 320, maxLines: 3 })
 
 const element = document.querySelector("[data-truncate]")!
 const elementTruncator = createTruncator(element)
-elementTruncator.truncate({ maxLines: 2 })`,
+elementTruncator.truncate({ maxLines: 2 })
+elementTruncator.truncateMiddle({ maxWidth: "40ch" })`,
   },
   {
     id: "fn-detectFont",
@@ -300,7 +301,7 @@ export const typeDocs: ApiTypeDoc[] = [
     title: "BoundTruncator",
     signature: `interface BoundTruncator {\n  truncate(opts?: Partial<TruncateOptions>): TruncateResult\n  truncateByWidth(opts?: Partial<TruncateOptions>): TruncateResult\n  truncateByLines(opts?: Partial<TruncateOptions>): TruncateResult\n  truncateStart(opts?: Partial<TruncateOptions>): TruncateResult\n  truncateMiddle(opts?: Partial<TruncateOptions>): TruncateResult\n  truncateAtOffset(opts?: Partial<TruncateOptions & { offset?: number }>): TruncateResult\n  truncateRange(opts?: Partial<TruncateOptions & { start?: number; end?: number; context?: number; before?: number; after?: number }>): TruncateResult\n  truncateAround(opts?: Partial<TruncateOptions & { target?: string; context?: number; before?: number; after?: number }>): TruncateResult\n  measureHeight(opts?: Partial<MeasureOptions>): number\n}`,
     description:
-      "Element-bound truncator returned by `createTruncator(element)`. Accepts DOM nodes, custom elements, or DOM-compatible objects; reads current textContent per call, writes back the result, and avoids compounding prior write-back. Recreate it when styles change.",
+      "Element-bound truncator returned by `createTruncator(element)`. Accepts DOM nodes, custom elements, or DOM-compatible objects; infers font/width at bind time, reads current textContent per call, writes back the result, and avoids compounding prior write-back. Pass maxWidth only to override the inferred width for one operation.",
   },
   {
     id: "type-DOMCompatibleElement",
@@ -341,7 +342,7 @@ type DOMCompatibleElement = DOMNativeElementLike | DOMCompatibleAdapter`,
 export const optionRows = [
   ["font", "string", "auto-detect", "All measurement APIs"],
   ["selector", "string", "—", "Font lookup"],
-  ["maxWidth", "CssWidth", "required", "All truncation and measurement APIs"],
+  ["maxWidth", "CssWidth", "required unless bound", "All truncation and measurement APIs"],
   ["lineHeight", "number", "20 for line truncation", "Lines and height"],
   ["maxLines", "number", "1", "truncateByLines"],
   ["keepLines", "number[]", "—", "truncateByLines"],

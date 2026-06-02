@@ -270,6 +270,14 @@ test("explicit maxWidth overrides inferred width", () => {
   expect(r.truncated).toBe(true);
 });
 
+test("explicit CSS maxWidth override uses inferred element font", () => {
+  const el = mockElement(LONG, { fontSize: "20px", fontFamily: "serif" }, 500);
+  const t = createTruncator(el);
+
+  expect(t.truncateByWidth({ maxWidth: "4em" }).truncated).toBe(true);
+  expect(t.truncateByWidth({ maxWidth: "4ch" }).truncated).toBe(true);
+});
+
 test("explicit lineHeight overrides inferred lineHeight", () => {
   const el = mockElement(PARA, { lineHeight: "20px" }, 80);
   const t = createTruncator(el);
